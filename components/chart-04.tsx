@@ -182,7 +182,7 @@ export function Chart04() {
                     projected: "Projected",
                   }}
                   dataKeys={["actual", "projected"]}
-                  valueFormatter={(value) => `$${value.toLocaleString()}`}
+                  valueFormatter={(value:any) => `$${value.toLocaleString()}`}
                 />
               }
               cursor={<CustomCursor fill="var(--chart-4)" />}

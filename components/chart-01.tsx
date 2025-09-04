@@ -149,7 +149,7 @@ export function Chart01() {
                     projected: "Projected",
                   }}
                   dataKeys={["actual", "projected"]}
-                  valueFormatter={(value) => `$${value.toLocaleString()}`}
+                  valueFormatter={(value:any) => `$${value.toLocaleString()}`}
                 />
               }
             />

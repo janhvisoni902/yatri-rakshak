@@ -10,6 +10,7 @@ import {
   Zap,
   ArrowUpRight,
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AppHero() {
   // State for animated counters
@@ -23,14 +24,14 @@ export default function AppHero() {
   useEffect(() => {
     const interval = setInterval(() => {
       setStats((prev) => {
-        const newUsers = prev.users >= 20000 ? 20000 : prev.users + 500;
+        const newUsers = prev.users >= 10 ? 10 : prev.users + 1;
         const newTransactions =
-          prev.transactions >= 1500000 ? 1500000 : prev.transactions + 37500;
+          prev.transactions >= 1250 ? 1250 : prev.transactions + 20;
         const newNetworks = prev.networks >= 40 ? 40 : prev.networks + 1;
 
         if (
-          newUsers === 20000 &&
-          newTransactions === 1500000 &&
+          newUsers === 20 &&
+          newTransactions === 1250 &&
           newNetworks === 40
         ) {
           clearInterval(interval);
@@ -203,7 +204,7 @@ export default function AppHero() {
       <div className="fadein-blur relative z-0 mx-auto mb-10 h-[300px] w-[300px] lg:absolute lg:top-1/2 lg:right-1/2 lg:mx-0 lg:mb-0 lg:h-[500px] lg:w-[500px] lg:translate-x-1/2 lg:-translate-y-2/3">
         <img
           src="https://i.postimg.cc/fLptvwMg/nexus.webp"
-          alt="Nexus Platform 3D Visualization"
+          alt="A Platform 3D Visualization"
           className="h-full w-full object-contain drop-shadow-[0_0_35px_#3358ea85] transition-all duration-1000 hover:scale-110"
         />
         <motion.div
@@ -259,16 +260,16 @@ export default function AppHero() {
               <span className="mr-2 rounded-full bg-purple-500 px-2 py-0.5 text-xs font-semibold text-white">
                 New
               </span>
-              Introducing Nexus Platform
+              Introducing Panic Feature
             </motion.div>
 
             <motion.h1
               variants={itemVariants}
-              className="mb-6 bg-gradient-to-r from-white/70 via-white to-slate-500/80 bg-clip-text text-3xl leading-tight text-transparent sm:text-4xl md:text-5xl lg:text-6xl"
+              className="mb-6 bg-gradient-to-r from-white/70 via-white to-slate-500/80 bg-clip-text text-3xl leading-tight font-semibold text-transparent sm:text-4xl md:text-5xl lg:text-6xl"
             >
               The Bridge Between <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                AI and Web3
+                Safety and Web3
               </span>
             </motion.h1>
 
@@ -277,12 +278,12 @@ export default function AppHero() {
               variants={itemVariants}
               className="mb-6 flex flex-wrap justify-center gap-4 md:gap-6 lg:justify-start"
             >
-              <div className="rounded-lg border border-purple-500/20 bg-black/40 px-4 py-2 backdrop-blur-sm">
+              {/* <div className="rounded-lg border border-purple-500/20 bg-black/40 px-4 py-2 backdrop-blur-sm">
                 <p className="text-2xl font-bold text-white">
                   {stats.users.toLocaleString()}+
                 </p>
                 <p className="text-xs text-gray-400">Active Users</p>
-              </div>
+              </div> */}
               <div className="rounded-lg border border-blue-500/20 bg-black/40 px-4 py-2 backdrop-blur-sm">
                 <p className="text-2xl font-bold text-white">
                   {stats.transactions.toLocaleString()}+
@@ -329,28 +330,28 @@ export default function AppHero() {
               variants={itemVariants}
               className="mb-8 max-w-md px-6 text-center text-lg leading-relaxed text-slate-300/90 lg:text-end"
             >
-              Nexus connects AI tools with Web3 infrastructure, giving
-              developers the power to build beyond limits. One platform. Endless
-              potential.
+              AI-Powered Tourist Safety Monitoring & Incident Response System Enhanced with Geo-Fencing and Blockchain-based Digital ID.
             </motion.p>
             <motion.div
               variants={itemVariants}
               className="mb-8 flex flex-col flex-wrap gap-4 sm:flex-row lg:justify-end"
             >
+              <Link href={"/dashboard"}>
               <Button
                 className="group rounded-full border-t border-purple-400 bg-gradient-to-b from-purple-700 to-slate-950/80 px-6 py-6 text-white shadow-lg shadow-purple-600/20 transition-all hover:shadow-purple-600/40"
                 size="lg"
-              >
-                Start Building
+                >
+                Dashboard
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
+                </Link>
 
               <Button
                 variant="outline"
                 className="rounded-full border-purple-500/30 bg-transparent text-white hover:bg-purple-500/10 hover:text-white"
                 size="lg"
               >
-                View Demo
+                Sign Up
               </Button>
             </motion.div>
 

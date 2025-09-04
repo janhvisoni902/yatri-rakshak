@@ -141,7 +141,7 @@ export function Chart05() {
                     enterprise: "Enterprise",
                   }}
                   dataKeys={["individual", "team", "enterprise"]}
-                  valueFormatter={(value) => `$${value.toLocaleString()}`}
+                  valueFormatter={(value:any) => `$${value.toLocaleString()}`}
                 />
               }
             />

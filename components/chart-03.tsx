@@ -129,7 +129,7 @@ export function Chart03() {
                     churn: "Churn",
                   }}
                   dataKeys={["revenues", "churn"]}
-                  valueFormatter={(value) => `$${value.toLocaleString()}`}
+                  valueFormatter={(value:any) => `$${value.toLocaleString()}`}
                 />
               }
             />

@@ -12,11 +12,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Home', href: '/' },
-  { name: 'Features', href: '/features' },
-  { name: 'Solutions', href: '/solutions' },
-  { name: 'Pricing', href: '/pricing' },
+  { name: 'Features', href: '#features' },
   { name: 'Resources', href: '/resources' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'Docs', href: '/#docs' },
 ];
 
 export default function Header2() {
@@ -103,10 +101,10 @@ export default function Header2() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-foreground text-lg font-bold">
-                    Acme Inc.
+                    Yatri Rakshak
                   </span>
                   <span className="text-muted-foreground -mt-1 text-xs">
-                    Build faster
+                    Emphasizes Safety
                   </span>
                 </div>
               </Link>
@@ -166,10 +164,10 @@ export default function Header2() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Link prefetch={false}                  href="/signup"
+                <Link prefetch={false}                  href="/dashboard"
                   className="bg-foreground text-background hover:bg-foreground/90 inline-flex items-center space-x-2 rounded-lg px-5 py-2.5 text-sm font-medium shadow-sm transition-all duration-200"
                 >
-                  <span>Get Started</span>
+                  <span>Dashboard</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </motion.div>
@@ -232,11 +230,11 @@ export default function Header2() {
                   >
                     Sign In
                   </Link>
-                  <Link prefetch={false}                    href="/signup"
+                  <Link prefetch={false}                    href="/dashboard"
                     className="bg-foreground text-background hover:bg-foreground/90 block w-full rounded-lg py-3 text-center font-medium transition-all duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Get Started
+                   Dashboard
                   </Link>
                 </motion.div>
               </div>

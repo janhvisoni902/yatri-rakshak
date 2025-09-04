@@ -16,15 +16,15 @@ export function CustomTooltipContent({
   colorMap = {},
   labelMap = {},
   dataKeys, // If provided, will be used to order the items
-  valueFormatter = (value) => `$${value.toLocaleString()}`,
-}: CustomTooltipContentProps) {
+  valueFormatter = (value:any) => `$${value.toLocaleString()}`,
+}: CustomTooltipContentProps&any) {
   if (!active || !payload || !payload.length) {
     return null;
   }
 
   // Create a map of payload items by dataKey for easy lookup
   const payloadMap = payload.reduce(
-    (acc, item) => {
+    (acc:any, item:any) => {
       acc[item.dataKey as string] = item;
       return acc;
     },
@@ -35,15 +35,15 @@ export function CustomTooltipContent({
   // Otherwise, use the original payload order
   const orderedPayload = dataKeys
     ? dataKeys
-        .filter((key) => payloadMap[key]) // Only include keys that exist in the payload
-        .map((key) => payloadMap[key])
+        .filter((key:any) => payloadMap[key]) // Only include keys that exist in the payload
+        .map((key:any) => payloadMap[key])
     : payload;
 
   return (
     <div className="bg-popover text-popover-foreground grid min-w-32 items-start gap-1.5 rounded-lg border px-3 py-1.5 text-xs">
       <div className="font-medium">{label}</div>
       <div className="grid gap-1.5">
-        {orderedPayload.map((entry, index) => {
+        {orderedPayload.map((entry:any, index:any) => {
           // Skip undefined entries
           if (!entry) return null;
 
