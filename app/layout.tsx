@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Metadata } from "next";
+import { Providers } from "./providers";
 
 const fontSans = Space_Grotesk({
   subsets: ["latin",],
@@ -36,7 +37,9 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} font-sans antialiased`}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

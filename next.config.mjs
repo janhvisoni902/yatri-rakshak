@@ -1,5 +1,6 @@
 const nextConfig = {
-  assetPrefix: "/exp3-static",
+  // Remove asset prefix for local development
+  // assetPrefix: "/exp3-static",
   transpilePackages: ["@workspace/ui"],
   images: {
     remotePatterns: [
@@ -8,7 +9,11 @@ const nextConfig = {
         hostname: 'raw.githubusercontent.com',
       },
     ],    
-  },  
+  },
+  // Development configuration
+  turbopack: {
+    resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+  },
 }
 
 export default nextConfig
