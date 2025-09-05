@@ -10,6 +10,6 @@ export default function Home() {
       <TouristHero />
       <SafetyFeatures/>
       <FooterSection/>
-    </div>
+    </div> 
   );
 }
