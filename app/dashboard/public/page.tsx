@@ -60,7 +60,7 @@ export default function TouristDashboard() {
       router.push('/auth/signin');
       return;
     }
-    if (session.user.role !== 'tourist' && session.user.role !== 'local_citizen') {
+    if (!['public', 'tourist', 'local_citizen'].includes(session.user.role)) {
       router.push('/dashboard/admin');
       return;
     }
@@ -144,7 +144,7 @@ export default function TouristDashboard() {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!session || session.user.role !== 'public') {
+  if (!session || !['public', 'tourist', 'local_citizen'].includes(session.user.role)) {
     return null;
   }
 
