@@ -43,6 +43,13 @@
   --radius-xl: calc(var(--radius) + 4px);
   --color-chart-6: var(--chart-6);
   --color-destructive-foreground: var(--destructive-foreground);
+  
+  /* Custom breakpoints for mobile responsiveness */
+  --breakpoint-xs: 475px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
 }
 
 :root {
@@ -124,6 +131,20 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+  }
+  
+  /* Improve mobile viewport handling */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Better mobile touch handling */
+  button, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 }
 
@@ -185,5 +206,53 @@
   @keyframes defiFloat {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-20px); }
+  }
+  
+  /* Mobile-first responsive utilities */
+  .mobile-text-xs { font-size: 0.75rem; }
+  .mobile-text-sm { font-size: 0.875rem; }
+  .mobile-text-base { font-size: 1rem; }
+  .mobile-text-lg { font-size: 1.125rem; }
+  
+  /* Extra small screens (4.7" phones - 320px and up) */
+  @media (max-width: 374px) {
+    .xs-hidden { display: none !important; }
+    .xs-text-xs { font-size: 0.6rem !important; }
+    .xs-text-sm { font-size: 0.75rem !important; }
+    .xs-px-1 { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
+    .xs-py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+    .xs-gap-1 { gap: 0.25rem !important; }
+    .xs-mb-2 { margin-bottom: 0.5rem !important; }
+  }
+  
+  /* Small mobile screens (375px - 474px) */
+  @media (min-width: 375px) and (max-width: 474px) {
+    .xs\:inline { display: inline !important; }
+    .xs\:hidden { display: none !important; }
+    .xs\:flex-row { flex-direction: row !important; }
+    .xs\:w-auto { width: auto !important; }
+    .xs\:text-3xl { font-size: 1.875rem !important; }
+  }
+  
+  /* Ensure proper touch targets on mobile */
+  @media (max-width: 640px) {
+    button, a[role="button"], .clickable {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Improve readability on small screens */
+    .mobile-optimized {
+      line-height: 1.6;
+      letter-spacing: 0.025em;
+    }
+  }
+  
+  /* Landscape orientation adjustments for small phones */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .landscape-compact {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
   }
 }

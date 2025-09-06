@@ -151,31 +151,34 @@ export default function TouristDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Yatri Rakshak</h1>
-              <p className="text-muted-foreground">Public Dashboard</p>
+      <header className="border-b bg-card sticky top-0 z-40">
+        <div className="container mx-auto px-2 xs:px-4 py-2 xs:py-4">
+          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
+            <div className="w-full xs:w-auto">
+              <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-foreground">Yatri Rakshak</h1>
+              <p className="text-xs xs:text-sm text-muted-foreground">Public Dashboard</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex items-center space-x-2 xs:space-x-4 w-full xs:w-auto justify-between xs:justify-end">
+              <span className="text-xs xs:text-sm text-muted-foreground hidden sm:inline">
                 Welcome, {session.user.name}
               </span>
               <Button 
                 variant="outline" 
+                size="sm"
+                className="text-xs xs:text-sm px-2 xs:px-3"
                 onClick={() => router.push('/api/auth/signout')}
               >
-                Sign Out
+                <span className="hidden xs:inline">Sign Out</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-2 xs:px-4 py-3 xs:py-6">
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 rounded-lg bg-muted p-1 mb-6">
+        <div className="flex space-x-1 rounded-lg bg-muted p-1 mb-4 xs:mb-6 overflow-x-auto">
           {[
             { key: 'overview', label: 'Overview', icon: FileText },
             { key: 'report', label: 'Report Incident', icon: AlertTriangle },
@@ -184,21 +187,22 @@ export default function TouristDashboard() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center space-x-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              className={`flex items-center space-x-1 xs:space-x-2 rounded-md px-2 xs:px-3 py-2 text-xs xs:text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
+              <tab.icon className="w-3 h-3 xs:w-4 xs:h-4" />
+              <span className="hidden xs:inline">{tab.label}</span>
+              <span className="xs:hidden">{tab.key === 'overview' ? 'Home' : tab.key === 'report' ? 'Report' : 'Status'}</span>
             </button>
           ))}
         </div>
 
         {/* Content based on active tab */}
         {activeTab === 'overview' && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 xs:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {/* Emergency Contacts */}
             <Card>
               <CardHeader>
@@ -207,22 +211,22 @@ export default function TouristDashboard() {
                   <span>Emergency Contacts</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 xs:space-y-3">
                 <div className="flex justify-between items-center">
-                  <span>Police Emergency</span>
-                  <Badge variant="destructive">100</Badge>
+                  <span className="text-sm xs:text-base">Police Emergency</span>
+                  <Badge variant="destructive" className="text-xs">100</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Fire Department</span>
-                  <Badge variant="destructive">101</Badge>
+                  <span className="text-sm xs:text-base">Fire Department</span>
+                  <Badge variant="destructive" className="text-xs">101</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Medical Emergency</span>
-                  <Badge variant="destructive">102</Badge>
+                  <span className="text-sm xs:text-base">Medical Emergency</span>
+                  <Badge variant="destructive" className="text-xs">102</Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span>Tourist Helpline</span>
-                  <Badge variant="outline">1363</Badge>
+                  <span className="text-sm xs:text-base">Tourist Helpline</span>
+                  <Badge variant="outline" className="text-xs">1363</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -236,13 +240,13 @@ export default function TouristDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 border rounded-lg">
-                    <p className="text-sm font-medium">Heavy traffic on NH-1</p>
+                <div className="space-y-2 xs:space-y-3">
+                  <div className="p-2 xs:p-3 border rounded-lg">
+                    <p className="text-xs xs:text-sm font-medium">Heavy traffic on NH-1</p>
                     <p className="text-xs text-muted-foreground">15 minutes ago</p>
                   </div>
-                  <div className="p-3 border rounded-lg">
-                    <p className="text-sm font-medium">Weather alert: Heavy rain expected</p>
+                  <div className="p-2 xs:p-3 border rounded-lg">
+                    <p className="text-xs xs:text-sm font-medium">Weather alert: Heavy rain expected</p>
                     <p className="text-xs text-muted-foreground">1 hour ago</p>
                   </div>
                 </div>
@@ -254,26 +258,29 @@ export default function TouristDashboard() {
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 xs:space-y-3">
                 <Button 
-                  className="w-full" 
+                  className="w-full text-xs xs:text-sm" 
                   variant="destructive"
                   onClick={() => setActiveTab('report')}
                 >
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  Report Emergency
+                  <AlertTriangle className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                  <span className="hidden xs:inline">Report Emergency</span>
+                  <span className="xs:hidden">Emergency</span>
                 </Button>
                 <Button 
-                  className="w-full" 
+                  className="w-full text-xs xs:text-sm" 
                   variant="outline"
                   onClick={() => setActiveTab('status')}
                 >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Check Report Status
+                  <Clock className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                  <span className="hidden xs:inline">Check Report Status</span>
+                  <span className="xs:hidden">My Reports</span>
                 </Button>
-                <Button className="w-full" variant="outline">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Find Nearest Police Station
+                <Button className="w-full text-xs xs:text-sm" variant="outline">
+                  <MapPin className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                  <span className="hidden sm:inline">Find Nearest Police Station</span>
+                  <span className="sm:hidden">Find Police</span>
                 </Button>
               </CardContent>
             </Card>

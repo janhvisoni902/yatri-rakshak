@@ -224,51 +224,55 @@ export default function PoliceDashboard() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center space-x-2">
-                <Shield className="w-6 h-6 text-blue-500" />
+        <div className="container mx-auto px-2 xs:px-4 py-2 xs:py-4">
+          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
+            <div className="w-full xs:w-auto">
+              <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-foreground flex items-center space-x-2">
+                <Shield className="w-5 h-5 xs:w-6 xs:h-6 text-blue-500" />
                 <span>Yatri Rakshak</span>
               </h1>
-              <div className="flex items-center space-x-2">
-                <Badge className="bg-blue-100 text-blue-800">Police Officer</Badge>
+              <div className="flex flex-wrap items-center gap-1 xs:gap-2 mt-1">
+                <Badge className="bg-blue-100 text-blue-800 text-xs">Police Officer</Badge>
                 {session.user.badgeNumber && (
-                  <Badge variant="outline">Badge: {session.user.badgeNumber}</Badge>
+                  <Badge variant="outline" className="text-xs hidden xs:inline-flex">Badge: {session.user.badgeNumber}</Badge>
                 )}
-                <Badge variant="outline">{session.user.department}</Badge>
+                <Badge variant="outline" className="text-xs hidden sm:inline-flex">{session.user.department}</Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="destructive" size="sm">
-                <Siren className="w-4 h-4 mr-2" />
-                Emergency
+            <div className="flex items-center space-x-1 xs:space-x-2 sm:space-x-4 w-full xs:w-auto justify-between xs:justify-end">
+              <Button variant="destructive" size="sm" className="text-xs xs:text-sm px-2 xs:px-3">
+                <Siren className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                <span className="hidden xs:inline">Emergency</span>
+                <span className="xs:hidden">SOS</span>
               </Button>
-              <span className="text-sm text-muted-foreground">
-                Officer {session.user.name}
+              <span className="text-xs xs:text-sm text-muted-foreground hidden md:inline">
+                {session.user.name}
               </span>
               <Button 
                 variant="outline" 
+                size="sm"
+                className="text-xs xs:text-sm px-2 xs:px-3"
                 onClick={() => router.push('/api/auth/signout')}
               >
-                Sign Out
+                <span className="hidden xs:inline">Sign Out</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-2 xs:px-4 py-3 xs:py-6">
         {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6 mb-6">
+        <div className="grid gap-2 xs:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 xs:mb-6">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Patrols</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.activePatrols}</p>
+                  <p className="text-xs xs:text-sm font-medium text-muted-foreground">Patrols</p>
+                  <p className="text-lg xs:text-2xl font-bold text-blue-600">{stats.activePatrols}</p>
                 </div>
-                <Car className="w-6 h-6 text-blue-500" />
+                <Car className="w-4 h-4 xs:w-6 xs:h-6 text-blue-500" />
               </div>
             </CardContent>
           </Card>
@@ -335,12 +339,12 @@ export default function PoliceDashboard() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="incidents">Active Incidents</TabsTrigger>
-            <TabsTrigger value="patrols">Patrol Units</TabsTrigger>
-            <TabsTrigger value="reports">File Report</TabsTrigger>
-            <TabsTrigger value="tools">Police Tools</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 xs:space-y-4">
+          <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+            <TabsTrigger value="incidents" className="text-xs xs:text-sm py-2 xs:py-2.5">Incidents</TabsTrigger>
+            <TabsTrigger value="patrols" className="text-xs xs:text-sm py-2 xs:py-2.5">Patrols</TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs xs:text-sm py-2 xs:py-2.5">Reports</TabsTrigger>
+            <TabsTrigger value="tools" className="text-xs xs:text-sm py-2 xs:py-2.5">Tools</TabsTrigger>
           </TabsList>
 
           <TabsContent value="incidents" className="space-y-4">

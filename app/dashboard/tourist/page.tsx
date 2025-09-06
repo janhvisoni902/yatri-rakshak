@@ -261,140 +261,144 @@ export default function TouristDashboard() {
     <div className="min-h-screen defi-animated-bg">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center space-x-2">
-                <Globe className="w-6 h-6 text-primary" />
+        <div className="container mx-auto px-2 xs:px-4 py-2 xs:py-4">
+          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
+            <div className="w-full xs:w-auto">
+              <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-foreground flex items-center space-x-2">
+                <Globe className="w-5 h-5 xs:w-6 xs:h-6 text-primary" />
                 <span className="defi-text-gradient">Yatri Rakshak</span>
               </h1>
-              <div className="flex items-center space-x-2">
-                <Badge className="bg-primary/20 text-primary border-primary/30">Tourist</Badge>
-                <Badge variant="outline" className="border-primary/30 text-foreground">Safety Score: {stats.safetyScore}/100</Badge>
-                <Badge variant="outline" className="border-primary/30 text-foreground">{stats.daysRemaining} days remaining</Badge>
+              <div className="flex flex-wrap items-center gap-1 xs:gap-2 mt-1">
+                <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">Tourist</Badge>
+                <Badge variant="outline" className="border-primary/30 text-foreground text-xs hidden xs:inline-flex">Safety: {stats.safetyScore}/100</Badge>
+                <Badge variant="outline" className="border-primary/30 text-foreground text-xs">{stats.daysRemaining} days left</Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 xs:space-x-2 sm:space-x-4 w-full xs:w-auto justify-between xs:justify-end">
               <Button 
-                className="defi-button bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30"
+                className="defi-button bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30 text-xs xs:text-sm px-2 xs:px-3"
                 size="sm"
                 onClick={handleEmergencyCall}
               >
-                <Phone className="w-4 h-4 mr-2" />
-                Emergency
+                <Phone className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                <span className="hidden xs:inline">Emergency</span>
+                <span className="xs:hidden">SOS</span>
               </Button>
               <Button 
                 variant="outline" 
                 size="sm"
-                className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
+                className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs xs:text-sm px-2 xs:px-3 hidden sm:flex"
                 onClick={handleShareLocation}
               >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Location
+                <Share2 className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                <span className="hidden md:inline">Share Location</span>
+                <span className="md:hidden">Share</span>
               </Button>
-              <span className="text-sm text-foreground/70">
-                Welcome, {session.user.name}
+              <span className="text-xs xs:text-sm text-foreground/70 hidden md:inline">
+                {session.user.name}
               </span>
               <Button 
                 variant="outline" 
-                className="border-border/50 bg-background/50 text-foreground hover:bg-background/80"
+                size="sm"
+                className="border-border/50 bg-background/50 text-foreground hover:bg-background/80 text-xs xs:text-sm px-2 xs:px-3"
                 onClick={() => router.push('/api/auth/signout')}
               >
-                Sign Out
+                <span className="hidden xs:inline">Sign Out</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-2 xs:px-4 py-3 xs:py-6">
         {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6 mb-6">
+        <div className="grid gap-2 xs:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 xs:mb-6">
           <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Safety Score</p>
-                  <p className="text-2xl font-bold text-green-400">{stats.safetyScore}/100</p>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Safety Score</p>
+                  <p className="text-lg xs:text-2xl font-bold text-green-400">{stats.safetyScore}/100</p>
                 </div>
-                <Shield className="w-6 h-6 text-green-400" />
+                <Shield className="w-4 h-4 xs:w-6 xs:h-6 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Places Visited</p>
-                  <p className="text-2xl font-bold text-blue-400">{stats.placesVisited}</p>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Places</p>
+                  <p className="text-lg xs:text-2xl font-bold text-blue-400">{stats.placesVisited}</p>
                 </div>
-                <MapPin className="w-6 h-6 text-blue-400" />
+                <MapPin className="w-4 h-4 xs:w-6 xs:h-6 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Photos Shared</p>
-                  <p className="text-2xl font-bold text-purple-400">{stats.photosShared}</p>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Photos</p>
+                  <p className="text-lg xs:text-2xl font-bold text-purple-400">{stats.photosShared}</p>
                 </div>
-                <PhotoIcon className="w-6 h-6 text-purple-400" />
+                <PhotoIcon className="w-4 h-4 xs:w-6 xs:h-6 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Emergency Contacts</p>
-                  <p className="text-2xl font-bold text-orange-400">{stats.emergencyContacts}</p>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Contacts</p>
+                  <p className="text-lg xs:text-2xl font-bold text-orange-400">{stats.emergencyContacts}</p>
                 </div>
-                <Users className="w-6 h-6 text-orange-400" />
+                <Users className="w-4 h-4 xs:w-6 xs:h-6 text-orange-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Days Remaining</p>
-                  <p className="text-2xl font-bold text-red-400">{stats.daysRemaining}</p>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Days Left</p>
+                  <p className="text-lg xs:text-2xl font-bold text-red-400">{stats.daysRemaining}</p>
                 </div>
-                <Calendar className="w-6 h-6 text-red-400" />
+                <Calendar className="w-4 h-4 xs:w-6 xs:h-6 text-red-400" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-6">
+          <Card className="defi-card hover:defi-glow transition-all duration-300 col-span-2 sm:col-span-1">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Current Location</p>
-                  <p className="text-sm font-bold text-foreground/80">{stats.currentLocation}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Location</p>
+                  <p className="text-xs xs:text-sm font-bold text-foreground/80 truncate">{stats.currentLocation}</p>
                 </div>
-                <Compass className="w-6 h-6 text-foreground/60" />
+                <Compass className="w-4 h-4 xs:w-6 xs:h-6 text-foreground/60 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="places">Places</TabsTrigger>
-            <TabsTrigger value="safety">Safety</TabsTrigger>
-            <TabsTrigger value="emergency">Emergency</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 xs:space-y-4">
+          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+            <TabsTrigger value="overview" className="text-xs xs:text-sm py-2 xs:py-2.5">Overview</TabsTrigger>
+            <TabsTrigger value="places" className="text-xs xs:text-sm py-2 xs:py-2.5">Places</TabsTrigger>
+            <TabsTrigger value="safety" className="text-xs xs:text-sm py-2 xs:py-2.5">Safety</TabsTrigger>
+            <TabsTrigger value="emergency" className="text-xs xs:text-sm py-2 xs:py-2.5">Emergency</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs xs:text-sm py-2 xs:py-2.5">Profile</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-6 md:grid-cols-2">
+          <TabsContent value="overview" className="space-y-3 xs:space-y-4">
+            <div className="grid gap-3 xs:gap-6 md:grid-cols-2">
               {/* Safety Alerts */}
               <Card>
                 <CardHeader>
@@ -403,28 +407,30 @@ export default function TouristDashboard() {
                     <span>Safety Alerts</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2 xs:space-y-3">
                   {safetyAlerts.filter(alert => !alert.acknowledged).map(alert => (
-                    <div key={alert.id} className="p-3 border rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Badge className={getSeverityColor(alert.severity)}>
+                    <div key={alert.id} className="p-2 xs:p-3 border rounded-lg">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col xs:flex-row xs:items-center space-y-1 xs:space-y-0 xs:space-x-2 mb-1">
+                            <Badge className={`${getSeverityColor(alert.severity)} text-xs`}>
                               {alert.severity.toUpperCase()}
                             </Badge>
-                            <h4 className="font-medium">{alert.title}</h4>
+                            <h4 className="font-medium text-sm xs:text-base truncate">{alert.title}</h4>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">{alert.message}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs xs:text-sm text-muted-foreground mb-2 line-clamp-2">{alert.message}</p>
+                          <p className="text-xs text-muted-foreground truncate">
                             {alert.location} • {new Date(alert.timestamp).toLocaleString()}
                           </p>
                         </div>
                         <Button 
                           size="sm" 
                           variant="outline"
+                          className="flex-shrink-0 h-8 w-8 xs:h-auto xs:w-auto xs:px-3"
                           onClick={() => acknowledgeAlert(alert.id)}
                         >
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4" />
+                          <span className="hidden xs:inline ml-1">OK</span>
                         </Button>
                       </div>
                     </div>
@@ -446,22 +452,26 @@ export default function TouristDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button className="h-20 flex-col space-y-2">
-                      <Camera className="w-6 h-6" />
-                      <span>Report Incident</span>
+                  <div className="grid grid-cols-2 gap-2 xs:gap-3">
+                    <Button className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Camera className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Report Incident</span>
+                      <span className="xs:hidden">Report</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col space-y-2">
-                      <Map className="w-6 h-6" />
-                      <span>Find Safe Places</span>
+                    <Button variant="outline" className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Map className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Find Safe Places</span>
+                      <span className="xs:hidden">Safe Places</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col space-y-2">
-                      <Phone className="w-6 h-6" />
-                      <span>Call Police</span>
+                    <Button variant="outline" className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Phone className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Call Police</span>
+                      <span className="xs:hidden">Police</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col space-y-2">
-                      <Share2 className="w-6 h-6" />
-                      <span>Share Location</span>
+                    <Button variant="outline" className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Share2 className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Share Location</span>
+                      <span className="xs:hidden">Share</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -507,87 +517,97 @@ export default function TouristDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="places" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-semibold">Places & Attractions</h2>
-                <p className="text-sm text-muted-foreground">
+          <TabsContent value="places" className="space-y-3 xs:space-y-4">
+            <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-3 xs:space-y-0">
+              <div className="w-full xs:w-auto">
+                <h2 className="text-lg xs:text-xl font-semibold">Places & Attractions</h2>
+                <p className="text-xs xs:text-sm text-muted-foreground">
                   Discover and track your visited places
                 </p>
               </div>
-              <div className="flex space-x-2">
-                <Input placeholder="Search places..." className="w-64" />
-                <Button variant="outline">
-                  <Filter className="w-4 h-4" />
-                </Button>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Place
-                </Button>
+              <div className="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 w-full xs:w-auto">
+                <Input placeholder="Search places..." className="w-full xs:w-48 lg:w-64" />
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm" className="flex-1 xs:flex-none">
+                    <Filter className="w-3 h-3 xs:w-4 xs:h-4" />
+                    <span className="ml-1 xs:hidden">Filter</span>
+                  </Button>
+                  <Button size="sm" className="flex-1 xs:flex-none">
+                    <Plus className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                    <span className="hidden xs:inline">Add Place</span>
+                    <span className="xs:hidden">Add</span>
+                  </Button>
+                </div>
               </div>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-3 xs:gap-4">
               {locations.map(location => (
-                <Card key={location.id} className="border-l-4 border-l-blue-500">
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <h3 className="font-semibold text-lg">{location.name}</h3>
-                          <Badge className={getSafetyColor(location.safetyLevel)}>
-                            {location.safetyLevel.toUpperCase()}
-                          </Badge>
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                            <span className="text-sm">{location.rating}</span>
+                <Card key={location.id} className="border-l-4 border-l-blue-500 overflow-hidden">
+                  <CardContent className="pt-3 xs:pt-6 p-3 xs:p-6">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-3 lg:space-y-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col xs:flex-row xs:items-center space-y-2 xs:space-y-0 xs:space-x-3 mb-3">
+                          <h3 className="font-semibold text-base xs:text-lg truncate">{location.name}</h3>
+                          <div className="flex items-center space-x-2">
+                            <Badge className={`${getSafetyColor(location.safetyLevel)} text-xs`}>
+                              {location.safetyLevel.toUpperCase()}
+                            </Badge>
+                            <div className="flex items-center space-x-1">
+                              <Star className="w-3 h-3 xs:w-4 xs:h-4 text-yellow-500 fill-current" />
+                              <span className="text-xs xs:text-sm">{location.rating}</span>
+                            </div>
                           </div>
                         </div>
                         
-                        <p className="text-gray-700 dark:text-gray-300 mb-3">{location.address}</p>
+                        <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm xs:text-base break-words">{location.address}</p>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-4 text-xs xs:text-sm text-muted-foreground">
                           <div className="flex items-center space-x-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{location.type}</span>
+                            <MapPin className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0" />
+                            <span className="truncate">{location.type}</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>{location.visited ? 'Visited' : 'Not visited'}</span>
+                            <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0" />
+                            <span className="truncate">{location.visited ? 'Visited' : 'Not visited'}</span>
                           </div>
                           {location.photos && (
                             <div className="flex items-center space-x-1">
-                              <PhotoIcon className="w-4 h-4" />
-                              <span>{location.photos.length} photos</span>
+                              <PhotoIcon className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0" />
+                              <span className="truncate">{location.photos.length} photos</span>
                             </div>
                           )}
                         </div>
 
                         {location.notes && (
                           <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/30 rounded">
-                            <p className="text-sm">
+                            <p className="text-xs xs:text-sm break-words">
                               <strong>Notes:</strong> {location.notes}
                             </p>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex flex-col space-y-2 ml-4">
-                        <Button size="sm">
-                          <Navigation className="w-4 h-4 mr-1" />
-                          Navigate
+                      <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-4 overflow-x-auto lg:overflow-x-visible">
+                        <Button size="sm" className="flex-shrink-0 text-xs">
+                          <Navigation className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Navigate</span>
+                          <span className="xs:hidden">Nav</span>
                         </Button>
-                        <Button size="sm" variant="outline">
-                          <PhotoIcon className="w-4 h-4 mr-1" />
-                          Add Photo
+                        <Button size="sm" variant="outline" className="flex-shrink-0 text-xs">
+                          <PhotoIcon className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Add Photo</span>
+                          <span className="xs:hidden">Photo</span>
                         </Button>
-                        <Button size="sm" variant="outline">
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit Notes
+                        <Button size="sm" variant="outline" className="flex-shrink-0 text-xs">
+                          <Edit className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Edit Notes</span>
+                          <span className="xs:hidden">Edit</span>
                         </Button>
-                        <Button size="sm" variant="outline">
-                          <Share2 className="w-4 h-4 mr-1" />
-                          Share
+                        <Button size="sm" variant="outline" className="flex-shrink-0 text-xs">
+                          <Share2 className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Share</span>
+                          <span className="xs:hidden">Share</span>
                         </Button>
                       </div>
                     </div>
