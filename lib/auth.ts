@@ -14,41 +14,54 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Invalid credentials');
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.log('Missing credentials');
+            return null;
+          }
+
+          await connectDB();
+
+          const user = await User.findOne({ email: credentials.email.toLowerCase() }).select('+password');
+
+          if (!user) {
+            console.log('User not found:', credentials.email);
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isPasswordValid) {
+            console.log('Invalid password for user:', credentials.email);
+            return null;
+          }
+
+          // Allow login regardless of verification status
+          // Verification will be handled in the dashboard router
+
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            badgeNumber: user.badgeNumber,
+            department: user.department,
+            verificationStatus: user.verificationStatus,
+          };
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
         }
-
-        await connectDB();
-
-        const user = await User.findOne({ email: credentials.email }).select('+password');
-
-        if (!user) {
-          throw new Error('Invalid credentials');
-        }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isPasswordValid) {
-          throw new Error('Invalid credentials');
-        }
-
-        if (user.verificationStatus !== 'verified') {
-          throw new Error('Account pending verification');
-        }
-
-        return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          badgeNumber: user.badgeNumber,
-          department: user.department,
-          verificationStatus: user.verificationStatus,
-        };
       },
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always redirect to dashboard router after login
+      if (url.startsWith('/')) return `${baseUrl}/dashboard`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/dashboard`;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
@@ -71,11 +84,24 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/error',
   },
   session: {
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
+  logger: {
+    error(code, metadata) {
+      console.error('NextAuth Error:', code, metadata);
+    },
+    warn(code) {
+      console.warn('NextAuth Warning:', code);
+    },
+    debug(code, metadata) {
+      console.log('NextAuth Debug:', code, metadata);
+    },
+  },
 };
 
 export const hasRole = (userRole: UserRole, allowedRoles: UserRole[]): boolean => {

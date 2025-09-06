@@ -8,163 +8,323 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/input';
 import { Badge } from '@/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
-import { Switch } from '@/components/switch';
 import { 
-  Users, 
+  Eye, 
   AlertTriangle, 
-  BarChart3, 
-  FileText, 
-  CheckCircle, 
-  Clock, 
-  MapPin,
+  Users, 
   Shield,
-  Activity,
   TrendingUp,
-  Globe,
-  Navigation,
-  Eye,
-  Siren,
-  QrCode,
-  UserCheck,
+  TrendingDown,
+  Activity,
+  MapPin,
+  Clock,
+  Phone,
+  FileText,
+  BarChart3,
+  PieChart,
+  LineChart,
+  Download,
+  Filter,
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  CheckCircle,
+  XCircle,
   AlertCircle,
+  Info,
   Zap,
-  Brain,
+  Globe,
+  Building,
+  Car,
+  Camera,
   Radio,
+  MessageCircle,
+  Bell,
+  Settings,
+  User,
+  Calendar,
+  Map,
+  Navigation,
+  ExternalLink,
+  Send,
+  Mic,
+  Video,
+  Image,
+  Database,
+  Server,
+  Lock,
+  Unlock,
+  RefreshCw,
+  Target,
+  Award,
+  Flag,
+  Star,
   Heart,
   Battery,
-  Signal,
-  Camera,
-  Search,
-  Filter,
-  Download,
-  RefreshCw
+  Wifi,
+  Compass,
+  Share2,
+  Copy,
+  Archive,
+  Trash,
+  MoreHorizontal,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause,
+  Square,
+  RotateCcw,
+  RotateCw,
+  Maximize,
+  Minimize,
+  X,
+  Check,
+  Plus as PlusIcon,
+  Minus,
+  Divide,
+  Equal,
+  Percent,
+  DollarSign,
+  Euro,
+  IndianRupee,
+  Bitcoin,
+  CreditCard,
+  Wallet,
+  Receipt,
+  Calculator,
+  Calendar as CalendarIcon,
+  Clock as ClockIcon,
+  Timer,
+  Hourglass,
+
+ 
 } from 'lucide-react';
 
-interface DashboardStats {
-  totalTourists: number;
-  activeTourists: number;
-  emergencyAlerts: number;
-  missingPersons: number;
-  geofenceViolations: number;
-  avgSafetyScore: number;
+interface AuthorityStats {
+  totalIncidents: number;
+  resolvedIncidents: number;
+  activePatrols: number;
+  touristCount: number;
   responseTime: string;
-  iotDevicesConnected: number;
+  safetyScore: number;
+  pendingKYC: number;
+  systemAlerts: number;
 }
 
-interface TouristAlert {
+interface Incident {
   id: string;
-  touristId: string;
-  touristName: string;
+  title: string;
+  description: string;
+  location: string;
+  coordinates: { lat: number; lng: number };
+  status: 'reported' | 'dispatched' | 'investigating' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high' | 'emergency';
+  reportedBy: string;
+  assignedUnit?: string;
+  reportedAt: string;
+  updatedAt: string;
+  type: 'theft' | 'assault' | 'missing_person' | 'traffic' | 'suspicious_activity' | 'emergency' | 'tourist_harassment';
+  severity: 'minor' | 'moderate' | 'major' | 'critical';
+  affectedTourists?: number;
+}
+
+interface KYCApplication {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  role: string;
+  submittedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  fullName: string;
   nationality: string;
-  type: 'panic' | 'geo_fence' | 'anomaly' | 'missing' | 'route_deviation' | 'inactive';
+  idType: string;
+  idNumber: string;
+  badgeNumber?: string;
+  department?: string;
+  visitPurpose?: string;
+  visitDuration?: string;
+}
+
+interface SystemAlert {
+  id: string;
+  title: string;
   message: string;
-  location: { lat: number; lng: number; address: string; };
+  type: 'security' | 'performance' | 'maintenance' | 'data';
   severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'new' | 'investigating' | 'resolved';
-  assignedTo?: string;
-  response?: string;
   timestamp: string;
-  lastLocation: string;
-  safetyScore: number;
-  digitalId: string;
+  resolved: boolean;
 }
 
-interface Tourist {
+interface PatrolUnit {
   id: string;
-  digitalId: string;
-  name: string;
-  nationality: string;
-  phone: string;
-  email: string;
-  currentLocation: { lat: number; lng: number; address: string; };
-  safetyScore: number;
-  status: 'active' | 'missing' | 'safe' | 'in_distress';
-  lastActive: string;
-  visitDuration: number;
-  itinerary: string[];
+  callSign: string;
+  officers: string[];
+  location: string;
+  status: 'available' | 'busy' | 'responding' | 'off_duty';
+  lastUpdate: string;
+  efficiency: number;
 }
 
 export default function AuthorityDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
-  const [realTimeView, setRealTimeView] = useState(true);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  
-  const [stats, setStats] = useState<DashboardStats>({
-    totalTourists: 1247,
-    activeTourists: 892,
-    emergencyAlerts: 3,
-    missingPersons: 1,
-    geofenceViolations: 8,
-    avgSafetyScore: 78,
-    responseTime: '3.2',
-    iotDevicesConnected: 156
+  const [stats, setStats] = useState<AuthorityStats>({
+    totalIncidents: 156,
+    resolvedIncidents: 142,
+    activePatrols: 24,
+    touristCount: 1247,
+    responseTime: '6.2',
+    safetyScore: 87,
+    pendingKYC: 23,
+    systemAlerts: 3
   });
 
-  const [alerts, setAlerts] = useState<TouristAlert[]>([
+  const [incidents, setIncidents] = useState<Incident[]>([
     {
       id: '1',
-      touristId: 'TID-2025-001234',
-      touristName: 'Emma Johnson',
-      nationality: 'USA',
-      type: 'panic',
-      message: 'EMERGENCY: Panic button activated',
-      location: { lat: 26.9124, lng: 75.7873, address: 'Hawa Mahal, Jaipur' },
-      severity: 'critical',
-      status: 'new',
-      timestamp: '2025-01-04T14:30:00Z',
-      lastLocation: 'City Palace, Jaipur',
-      safetyScore: 25,
-      digitalId: 'TID-2025-001234'
+      title: 'Tourist Harassment - Red Fort',
+      description: 'Multiple reports of tourist harassment near Red Fort area',
+      location: 'Red Fort, Delhi',
+      coordinates: { lat: 28.6562, lng: 77.2410 },
+      status: 'investigating',
+      priority: 'high',
+      severity: 'major',
+      reportedBy: 'Tourist via App',
+      assignedUnit: 'Unit-7',
+      reportedAt: '2025-01-04T14:30:00Z',
+      updatedAt: '2025-01-04T15:00:00Z',
+      type: 'tourist_harassment',
+      affectedTourists: 5
     },
     {
       id: '2',
-      touristId: 'TID-2025-001235',
-      touristName: 'David Chen',
-      nationality: 'Canada',
-      type: 'geo_fence',
-      message: 'Tourist entered restricted area near Amber Fort',
-      location: { lat: 26.9855, lng: 75.8513, address: 'Restricted Zone, Amber Fort Area' },
-      severity: 'high',
-      status: 'investigating',
-      assignedTo: 'Officer Singh',
-      timestamp: '2025-01-04T13:45:00Z',
-      lastLocation: 'Amber Fort Entrance',
-      safetyScore: 68,
-      digitalId: 'TID-2025-001235'
+      title: 'Pickpocketing Spree',
+      description: 'Organized pickpocketing in Connaught Place',
+      location: 'Connaught Place, Delhi',
+      coordinates: { lat: 28.6315, lng: 77.2167 },
+      status: 'dispatched',
+      priority: 'medium',
+      severity: 'moderate',
+      reportedBy: 'Multiple witnesses',
+      assignedUnit: 'Unit-3',
+      reportedAt: '2025-01-04T13:15:00Z',
+      updatedAt: '2025-01-04T14:00:00Z',
+      type: 'theft',
+      affectedTourists: 8
     },
     {
       id: '3',
-      touristId: 'TID-2025-001236',
-      touristName: 'Maria Rodriguez',
-      nationality: 'Spain',
-      type: 'anomaly',
-      message: 'Unusual activity pattern detected - prolonged inactivity',
-      location: { lat: 26.9548, lng: 75.8205, address: 'Jantar Mantar, Jaipur' },
-      severity: 'medium',
-      status: 'new',
-      timestamp: '2025-01-04T12:15:00Z',
-      lastLocation: 'Jantar Mantar Observatory',
-      safetyScore: 82,
-      digitalId: 'TID-2025-001236'
+      title: 'Missing Tourist - German National',
+      description: 'German tourist missing since yesterday evening',
+      location: 'India Gate, Delhi',
+      coordinates: { lat: 28.6129, lng: 77.2295 },
+      status: 'investigating',
+      priority: 'emergency',
+      severity: 'critical',
+      reportedBy: 'Hotel Manager',
+      assignedUnit: 'Unit-1',
+      reportedAt: '2025-01-04T12:45:00Z',
+      updatedAt: '2025-01-04T13:30:00Z',
+      type: 'missing_person',
+      affectedTourists: 1
     }
   ]);
 
-  const [tourists, setTourists] = useState<Tourist[]>([
+  const [kycApplications, setKYCApplications] = useState<KYCApplication[]>([
     {
       id: '1',
-      digitalId: 'TID-2025-001234',
-      name: 'Emma Johnson',
+      userId: 'user1',
+      userName: 'John Smith',
+      userEmail: 'john@example.com',
+      role: 'tourist',
+      submittedAt: '2025-01-04T10:30:00Z',
+      status: 'pending',
+      fullName: 'John Smith',
       nationality: 'USA',
-      phone: '+1-555-0123',
-      email: 'emma.j@email.com',
-      currentLocation: { lat: 26.9124, lng: 75.7873, address: 'Hawa Mahal, Jaipur' },
-      safetyScore: 25,
-      status: 'in_distress',
-      lastActive: '2025-01-04T14:30:00Z',
-      visitDuration: 3,
-      itinerary: ['Hawa Mahal', 'City Palace', 'Amber Fort']
+      idType: 'passport',
+      idNumber: 'US123456789',
+      visitPurpose: 'tourism',
+      visitDuration: '2 weeks'
+    },
+    {
+      id: '2',
+      userId: 'user2',
+      userName: 'Rajesh Kumar',
+      userEmail: 'rajesh@police.gov.in',
+      role: 'police',
+      submittedAt: '2025-01-04T09:15:00Z',
+      status: 'pending',
+      fullName: 'Rajesh Kumar',
+      nationality: 'India',
+      idType: 'aadhaar',
+      idNumber: '123456789012',
+      badgeNumber: 'DLP-2024-001',
+      department: 'Traffic Police'
+    }
+  ]);
+
+  const [systemAlerts, setSystemAlerts] = useState<SystemAlert[]>([
+    {
+      id: '1',
+      title: 'High Server Load',
+      message: 'Server CPU usage at 85% - monitoring required',
+      type: 'performance',
+      severity: 'medium',
+      timestamp: '2025-01-04T14:30:00Z',
+      resolved: false
+    },
+    {
+      id: '2',
+      title: 'Database Backup Failed',
+      message: 'Scheduled backup failed - manual intervention required',
+      type: 'data',
+      severity: 'high',
+      timestamp: '2025-01-04T13:00:00Z',
+      resolved: false
+    },
+    {
+      id: '3',
+      title: 'Security Scan Complete',
+      message: 'No vulnerabilities detected in latest security scan',
+      type: 'security',
+      severity: 'low',
+      timestamp: '2025-01-04T12:00:00Z',
+      resolved: true
+    }
+  ]);
+
+  const [patrolUnits, setPatrolUnits] = useState<PatrolUnit[]>([
+    {
+      id: '1',
+      callSign: 'Unit-1',
+      officers: ['Inspector Sharma', 'Constable Patel'],
+      location: 'India Gate Area',
+      status: 'responding',
+      lastUpdate: '2025-01-04T14:20:00Z',
+      efficiency: 92
+    },
+    {
+      id: '2',
+      callSign: 'Unit-3',
+      officers: ['Sub-Inspector Gupta', 'Constable Yadav'],
+      location: 'Connaught Place',
+      status: 'busy',
+      lastUpdate: '2025-01-04T14:15:00Z',
+      efficiency: 88
+    },
+    {
+      id: '3',
+      callSign: 'Unit-7',
+      officers: ['Constable Singh', 'Constable Kumar'],
+      location: 'Red Fort Area',
+      status: 'available',
+      lastUpdate: '2025-01-04T14:25:00Z',
+      efficiency: 95
     }
   ]);
 
@@ -174,59 +334,86 @@ export default function AuthorityDashboard() {
       router.push('/auth/signin');
       return;
     }
-    if (!['police', 'tourism_dept', 'higher_authority', 'admin'].includes(session.user.role)) {
-      router.push('/dashboard/tourist');
+    if (!['higher_authority', 'admin', 'tourism_dept'].includes(session.user.role)) {
+      if (session.user.role === 'police') {
+        router.push('/dashboard/police');
+      } else {
+        router.push('/dashboard/public');
+      }
       return;
     }
   }, [session, status, router]);
 
-  // Auto-refresh data every 30 seconds
-  useEffect(() => {
-    if (!autoRefresh) return;
-    
-    const interval = setInterval(() => {
-      // Simulate real-time data updates
-      setStats(prev => ({
-        ...prev,
-        activeTourists: prev.activeTourists + Math.floor(Math.random() * 3) - 1,
-        avgSafetyScore: Math.max(70, Math.min(85, prev.avgSafetyScore + (Math.random() - 0.5) * 2))
-      }));
-    }, 30000);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'reported': return 'bg-yellow-500';
+      case 'dispatched': return 'bg-blue-500';
+      case 'investigating': return 'bg-orange-500';
+      case 'resolved': return 'bg-green-500';
+      case 'closed': return 'bg-gray-500';
+      default: return 'bg-gray-500';
+    }
+  };
 
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
-
-  const getAlertTypeColor = (type: string) => {
-    switch (type) {
-      case 'panic': return 'bg-red-500';
-      case 'missing': return 'bg-red-600';
-      case 'geo_fence': return 'bg-orange-500';
-      case 'anomaly': return 'bg-yellow-500';
-      case 'route_deviation': return 'bg-purple-500';
-      case 'inactive': return 'bg-blue-500';
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'low': return 'bg-gray-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'high': return 'bg-orange-500';
+      case 'emergency': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-500 border-red-500';
-      case 'high': return 'text-orange-500 border-orange-500';
-      case 'medium': return 'text-yellow-500 border-yellow-500';
-      case 'low': return 'text-blue-500 border-blue-500';
-      default: return 'text-gray-500 border-gray-500';
+      case 'minor': return 'bg-green-500';
+      case 'moderate': return 'bg-yellow-500';
+      case 'major': return 'bg-orange-500';
+      case 'critical': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 
-  const handleAlertResponse = async (alertId: string, action: 'investigate' | 'resolve') => {
-    setAlerts(prev => 
+  const getAlertTypeColor = (type: string) => {
+    switch (type) {
+      case 'security': return 'bg-red-500';
+      case 'performance': return 'bg-yellow-500';
+      case 'maintenance': return 'bg-blue-500';
+      case 'data': return 'bg-purple-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const handleKYCApproval = (applicationId: string, approved: boolean) => {
+    setKYCApplications(prev => 
+      prev.map(app => 
+        app.id === applicationId 
+          ? { ...app, status: approved ? 'approved' : 'rejected' }
+          : app
+      )
+    );
+  };
+
+  const handleIncidentAction = (incidentId: string, action: string) => {
+    setIncidents(prev => 
+      prev.map(incident => 
+        incident.id === incidentId 
+          ? { 
+              ...incident, 
+              status: action as any,
+              updatedAt: new Date().toISOString()
+            }
+          : incident
+      )
+    );
+  };
+
+  const resolveSystemAlert = (alertId: string) => {
+    setSystemAlerts(prev => 
       prev.map(alert => 
         alert.id === alertId 
-          ? { 
-              ...alert, 
-              status: action === 'investigate' ? 'investigating' : 'resolved',
-              assignedTo: action === 'investigate' ? session?.user?.name : alert.assignedTo
-            }
+          ? { ...alert, resolved: true }
           : alert
       )
     );
@@ -236,7 +423,7 @@ export default function AuthorityDashboard() {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!session) {
+  if (!session || !['higher_authority', 'admin', 'tourism_dept'].includes(session.user.role)) {
     return null;
   }
 
@@ -248,43 +435,31 @@ export default function AuthorityDashboard() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-foreground flex items-center space-x-2">
-                <Shield className="w-6 h-6 text-blue-500" />
+                <Eye className="w-6 h-6 text-purple-500" />
                 <span>Yatri Rakshak</span>
               </h1>
               <div className="flex items-center space-x-2">
-                <Badge 
-                  className={`${
-                    session.user.role === 'tourism_dept' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-blue-100 text-blue-800'
-                  }`}
-                >
-                  {session.user.role === 'tourism_dept' ? 'Tourism Department' : 
-                   session.user.role === 'higher_authority' ? 'Higher Authority' : 'Police'}
+                <Badge className="bg-purple-100 text-purple-800">
+                  {session.user.role === 'admin' ? 'Administrator' : 
+                   session.user.role === 'higher_authority' ? 'Higher Authority' : 
+                   'Tourism Department'}
                 </Badge>
-                {session.user.badgeNumber && (
-                  <Badge variant="outline">Badge: {session.user.badgeNumber}</Badge>
+                {session.user.department && (
+                  <Badge variant="outline">{session.user.department}</Badge>
                 )}
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-muted-foreground">Auto-refresh</span>
-                <Switch 
-                  checked={autoRefresh} 
-                  onCheckedChange={setAutoRefresh}
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-              >
-                <RefreshCw className="w-4 h-4 mr-1" />
-                Refresh
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export Report
+              </Button>
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </Button>
               <span className="text-sm text-muted-foreground">
-                {session.user.name} ({session.user.department})
+                {session.user.name}
               </span>
               <Button 
                 variant="outline" 
@@ -298,65 +473,16 @@ export default function AuthorityDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Critical Alerts */}
-        {alerts.filter(alert => alert.severity === 'critical' && alert.status === 'new').length > 0 && (
-          <div className="mb-6">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-center space-x-2 mb-3">
-                <Siren className="w-5 h-5 text-red-500 animate-pulse" />
-                <h3 className="font-semibold text-red-800">CRITICAL EMERGENCY ALERTS</h3>
-              </div>
-              <div className="grid gap-3">
-                {alerts.filter(alert => alert.severity === 'critical' && alert.status === 'new').map(alert => (
-                  <div key={alert.id} className="bg-white border border-red-300 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <Badge className="bg-red-500">PANIC</Badge>
-                          <span className="font-semibold">{alert.touristName}</span>
-                          <span className="text-sm text-muted-foreground">({alert.nationality})</span>
-                          <span className="text-sm text-muted-foreground">ID: {alert.digitalId}</span>
-                        </div>
-                        <p className="text-sm mb-2">{alert.message}</p>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="w-3 h-3" />
-                            <span>{alert.location.address}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{new Date(alert.timestamp).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          className="bg-red-600 hover:bg-red-700"
-                          onClick={() => handleAlertResponse(alert.id, 'investigate')}
-                        >
-                          RESPOND NOW
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 mb-6">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-8 mb-6">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Tourists</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.activeTourists}</p>
-                  <p className="text-xs text-muted-foreground">of {stats.totalTourists} total</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Incidents</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.totalIncidents}</p>
                 </div>
-                <Users className="w-8 h-8 text-green-500" />
+                <AlertTriangle className="w-6 h-6 text-blue-500" />
               </div>
             </CardContent>
           </Card>
@@ -365,11 +491,10 @@ export default function AuthorityDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Emergency Alerts</p>
-                  <p className="text-3xl font-bold text-red-600">{stats.emergencyAlerts}</p>
-                  <p className="text-xs text-muted-foreground">requiring immediate action</p>
+                  <p className="text-sm font-medium text-muted-foreground">Resolved</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.resolvedIncidents}</p>
                 </div>
-                <Siren className="w-8 h-8 text-red-500" />
+                <CheckCircle className="w-6 h-6 text-green-500" />
               </div>
             </CardContent>
           </Card>
@@ -378,11 +503,22 @@ export default function AuthorityDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Avg Safety Score</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.avgSafetyScore}</p>
-                  <p className="text-xs text-muted-foreground">across all tourists</p>
+                  <p className="text-sm font-medium text-muted-foreground">Active Patrols</p>
+                  <p className="text-2xl font-bold text-orange-600">{stats.activePatrols}</p>
                 </div>
-                <Shield className="w-8 h-8 text-blue-500" />
+                <Car className="w-6 h-6 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Tourists</p>
+                  <p className="text-2xl font-bold text-purple-600">{stats.touristCount}</p>
+                </div>
+                <Users className="w-6 h-6 text-purple-500" />
               </div>
             </CardContent>
           </Card>
@@ -392,10 +528,45 @@ export default function AuthorityDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Response Time</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.responseTime}m</p>
-                  <p className="text-xs text-muted-foreground">average response</p>
+                  <p className="text-2xl font-bold text-red-600">{stats.responseTime}m</p>
                 </div>
-                <Zap className="w-8 h-8 text-purple-500" />
+                <Clock className="w-6 h-6 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Safety Score</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.safetyScore}/100</p>
+                </div>
+                <Shield className="w-6 h-6 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Pending KYC</p>
+                  <p className="text-2xl font-bold text-yellow-600">{stats.pendingKYC}</p>
+                </div>
+                <FileText className="w-6 h-6 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">System Alerts</p>
+                  <p className="text-2xl font-bold text-red-600">{stats.systemAlerts}</p>
+                </div>
+                <Bell className="w-6 h-6 text-red-500" />
               </div>
             </CardContent>
           </Card>
@@ -405,201 +576,224 @@ export default function AuthorityDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="alerts">Active Alerts</TabsTrigger>
-            <TabsTrigger value="tourists">Tourist Monitor</TabsTrigger>
+            <TabsTrigger value="incidents">Incidents</TabsTrigger>
+            <TabsTrigger value="kyc">KYC Management</TabsTrigger>
+            <TabsTrigger value="patrols">Patrol Units</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="geofence">Geo-Zones</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {/* Real-time Map Preview */}
-              <Card className="md:col-span-2">
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* System Alerts */}
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Navigation className="w-5 h-5 text-green-500" />
-                    <span>Real-time Tourist Locations</span>
-                    {realTimeView && <Badge variant="secondary" className="bg-green-100 text-green-800">LIVE</Badge>}
+                    <Bell className="w-5 h-5" />
+                    <span>System Alerts</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-gradient-to-br from-blue-100 to-green-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                    <div className="text-center">
-                      <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600">Interactive Map View</p>
-                      <p className="text-sm text-gray-500">Real-time tourist locations and geo-fence zones</p>
+                <CardContent className="space-y-3">
+                  {systemAlerts.filter(alert => !alert.resolved).map(alert => (
+                    <div key={alert.id} className="p-3 border rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <Badge className={getAlertTypeColor(alert.type)}>
+                              {alert.type.toUpperCase()}
+                            </Badge>
+                            <Badge className={getSeverityColor(alert.severity)}>
+                              {alert.severity.toUpperCase()}
+                            </Badge>
+                            <h4 className="font-medium">{alert.title}</h4>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">{alert.message}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(alert.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => resolveSystemAlert(alert.id)}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <div className="flex items-center space-x-4 text-sm">
-                      <div className="flex items-center space-x-1">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span>Safe ({stats.activeTourists - stats.emergencyAlerts - stats.geofenceViolations})</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                        <span>Caution ({stats.geofenceViolations})</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                        <span>Emergency ({stats.emergencyAlerts})</span>
-                      </div>
-                    </div>
-                    <Switch 
-                      checked={realTimeView} 
-                      onCheckedChange={setRealTimeView}
-                    />
-                  </div>
+                  ))}
+                  {systemAlerts.filter(alert => !alert.resolved).length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      No active system alerts
+                    </p>
+                  )}
                 </CardContent>
               </Card>
 
-              {/* Quick Stats */}
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">System Status</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">AI Monitoring</span>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">Active</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Geo-fencing</span>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">Enabled</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">Emergency Network</span>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">Online</Badge>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm">IoT Devices</span>
-                      <Badge variant="secondary">{stats.iotDevicesConnected} Connected</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button className="w-full" size="sm" variant="outline">
-                      <AlertTriangle className="w-4 h-4 mr-2" />
-                      Broadcast Alert
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Zap className="w-5 h-5" />
+                    <span>Quick Actions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button className="h-20 flex-col space-y-2">
+                      <BarChart3 className="w-6 h-6" />
+                      <span>Generate Report</span>
                     </Button>
-                    <Button className="w-full" size="sm" variant="outline">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Generate E-FIR
+                    <Button variant="outline" className="h-20 flex-col space-y-2">
+                      <Users className="w-6 h-6" />
+                      <span>Manage Users</span>
                     </Button>
-                    <Button className="w-full" size="sm" variant="outline">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Data
+                    <Button variant="outline" className="h-20 flex-col space-y-2">
+                      <Settings className="w-6 h-6" />
+                      <span>System Config</span>
                     </Button>
-                  </CardContent>
-                </Card>
-              </div>
+                    <Button variant="outline" className="h-20 flex-col space-y-2">
+                      <Download className="w-6 h-6" />
+                      <span>Export Data</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Activity className="w-5 h-5" />
+                  <span>Recent Activity</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">New incident reported at Red Fort</p>
+                      <p className="text-sm text-muted-foreground">2 hours ago</p>
+                    </div>
+                    <Badge variant="outline">High Priority</Badge>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">KYC application approved</p>
+                      <p className="text-sm text-muted-foreground">4 hours ago</p>
+                    </div>
+                    <Badge variant="outline">Tourist</Badge>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <Bell className="w-5 h-5 text-yellow-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">System maintenance scheduled</p>
+                      <p className="text-sm text-muted-foreground">6 hours ago</p>
+                    </div>
+                    <Badge variant="outline">Maintenance</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          <TabsContent value="alerts" className="space-y-4">
+          <TabsContent value="incidents" className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-semibold">Active Tourist Alerts</h2>
+                <h2 className="text-xl font-semibold">Incident Management</h2>
                 <p className="text-sm text-muted-foreground">
-                  {alerts.filter(a => a.status !== 'resolved').length} active alerts requiring attention
+                  Monitor and manage all reported incidents
                 </p>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Filter className="w-4 h-4 mr-1" />
-                  Filter
+                <Input placeholder="Search incidents..." className="w-64" />
+                <Button variant="outline">
+                  <Filter className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Search className="w-4 h-4 mr-1" />
-                  Search
+                <Button>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
                 </Button>
               </div>
             </div>
 
             <div className="grid gap-4">
-              {alerts.filter(alert => alert.status !== 'resolved').map(alert => (
-                <Card key={alert.id} className={`border-l-4 ${getSeverityColor(alert.severity).replace('text-', 'border-l-')}`}>
+              {incidents.map(incident => (
+                <Card key={incident.id} className="border-l-4 border-l-orange-500">
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
-                          <Badge className={getAlertTypeColor(alert.type)}>
-                            {alert.type.toUpperCase()}
+                          <h3 className="font-semibold text-lg">{incident.title}</h3>
+                          <Badge className={getStatusColor(incident.status)}>
+                            {incident.status.toUpperCase()}
                           </Badge>
-                          <span className="font-semibold text-lg">{alert.touristName}</span>
-                          <Badge variant="outline">{alert.nationality}</Badge>
-                          <Badge 
-                            variant="outline" 
-                            className={`${getSeverityColor(alert.severity)} font-medium`}
-                          >
-                            {alert.severity.toUpperCase()}
+                          <Badge className={getPriorityColor(incident.priority)}>
+                            {incident.priority.toUpperCase()}
+                          </Badge>
+                          <Badge className={getSeverityColor(incident.severity)}>
+                            {incident.severity.toUpperCase()}
                           </Badge>
                         </div>
                         
-                        <p className="text-gray-700 dark:text-gray-300 mb-3">{alert.message}</p>
+                        <p className="text-gray-700 dark:text-gray-300 mb-3">{incident.description}</p>
                         
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                          <div>
-                            <p className="font-medium">Digital ID:</p>
-                            <p className="font-mono">{alert.digitalId}</p>
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="w-4 h-4" />
+                            <span>{incident.location}</span>
                           </div>
-                          <div>
-                            <p className="font-medium">Location:</p>
-                            <p>{alert.location.address}</p>
+                          <div className="flex items-center space-x-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{new Date(incident.reportedAt).toLocaleString()}</span>
                           </div>
-                          <div>
-                            <p className="font-medium">Safety Score:</p>
-                            <p className={`font-bold ${alert.safetyScore < 50 ? 'text-red-500' : alert.safetyScore < 75 ? 'text-yellow-500' : 'text-green-500'}`}>
-                              {alert.safetyScore}/100
-                            </p>
+                          <div className="flex items-center space-x-1">
+                            <Users className="w-4 h-4" />
+                            <span>Reported by: {incident.reportedBy}</span>
                           </div>
-                          <div>
-                            <p className="font-medium">Time:</p>
-                            <p>{new Date(alert.timestamp).toLocaleString()}</p>
-                          </div>
+                          {incident.affectedTourists && (
+                            <div className="flex items-center space-x-1">
+                              <Globe className="w-4 h-4" />
+                              <span>{incident.affectedTourists} tourists affected</span>
+                            </div>
+                          )}
                         </div>
 
-                        {alert.assignedTo && (
+                        {incident.assignedUnit && (
                           <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/30 rounded">
                             <p className="text-sm">
-                              <strong>Assigned to:</strong> {alert.assignedTo}
-                              <Badge variant="secondary" className="ml-2">Investigating</Badge>
+                              <strong>Assigned Unit:</strong> {incident.assignedUnit}
                             </p>
                           </div>
                         )}
                       </div>
 
                       <div className="flex flex-col space-y-2 ml-4">
-                        {alert.status === 'new' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleAlertResponse(alert.id, 'investigate')}
-                            className={alert.severity === 'critical' ? 'bg-red-600 hover:bg-red-700' : ''}
-                          >
-                            {alert.severity === 'critical' ? 'RESPOND NOW' : 'Investigate'}
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          onClick={() => handleIncidentAction(incident.id, 'investigating')}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Investigate
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleAlertResponse(alert.id, 'resolve')}
+                          onClick={() => handleIncidentAction(incident.id, 'resolved')}
                         >
-                          Mark Resolved
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <MapPin className="w-4 h-4 mr-1" />
-                          View on Map
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Resolve
                         </Button>
                         <Button size="sm" variant="outline">
                           <FileText className="w-4 h-4 mr-1" />
-                          Create Report
+                          View Details
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Download className="w-4 h-4 mr-1" />
+                          Export Report
                         </Button>
                       </div>
                     </div>
@@ -609,210 +803,170 @@ export default function AuthorityDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="tourists" className="space-y-4">
+          <TabsContent value="kyc" className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-semibold">Tourist Monitoring</h2>
+                <h2 className="text-xl font-semibold">KYC Applications</h2>
                 <p className="text-sm text-muted-foreground">
-                  Live tracking of {stats.activeTourists} active tourists
+                  Review and approve user verification applications
                 </p>
               </div>
               <div className="flex space-x-2">
-                <Input placeholder="Search by name, ID, or nationality..." className="w-64" />
+                <Input placeholder="Search applications..." className="w-64" />
                 <Button variant="outline">
-                  <Search className="w-4 h-4" />
+                  <Filter className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
             <div className="grid gap-4">
-              {/* Sample tourist data */}
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                        EJ
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">Emma Johnson</h3>
-                        <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-                          <span>🇺🇸 USA</span>
-                          <span>•</span>
-                          <span>TID-2025-001234</span>
-                          <span>•</span>
-                          <span>Day 3 of visit</span>
+              {kycApplications.map(application => (
+                <Card key={application.id} className="border-l-4 border-l-blue-500">
+                  <CardContent className="pt-6">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <h3 className="font-semibold text-lg">{application.fullName}</h3>
+                          <Badge className="bg-blue-100 text-blue-800">
+                            {application.role.toUpperCase()}
+                          </Badge>
+                          <Badge className={application.status === 'pending' ? 'bg-yellow-500' : 
+                                           application.status === 'approved' ? 'bg-green-500' : 'bg-red-500'}>
+                            {application.status.toUpperCase()}
+                          </Badge>
                         </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground mb-3">
+                          <div>
+                            <p className="font-medium">Email:</p>
+                            <p>{application.userEmail}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">Nationality:</p>
+                            <p>{application.nationality}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">ID Type:</p>
+                            <p>{application.idType}</p>
+                          </div>
+                          <div>
+                            <p className="font-medium">Submitted:</p>
+                            <p>{new Date(application.submittedAt).toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        {application.badgeNumber && (
+                          <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded mb-3">
+                            <p className="text-sm">
+                              <strong>Badge Number:</strong> {application.badgeNumber} | 
+                              <strong> Department:</strong> {application.department}
+                            </p>
+                          </div>
+                        )}
+
+                        {application.visitPurpose && (
+                          <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded">
+                            <p className="text-sm">
+                              <strong>Visit Purpose:</strong> {application.visitPurpose} | 
+                              <strong> Duration:</strong> {application.visitDuration}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col space-y-2 ml-4">
+                        {application.status === 'pending' && (
+                          <>
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => handleKYCApproval(application.id, true)}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleKYCApproval(application.id, false)}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                        <Button size="sm" variant="outline">
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Details
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <FileText className="w-4 h-4 mr-1" />
+                          View Documents
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge className="bg-red-100 text-red-800">IN DISTRESS</Badge>
-                      <Badge variant="secondary">Score: 25</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <p className="font-medium">Current Location</p>
-                      <p className="text-muted-foreground">Hawa Mahal, Jaipur</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">Last Active</p>
-                      <p className="text-muted-foreground">2 min ago</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">Emergency Contact</p>
-                      <p className="text-muted-foreground">+1-555-0123</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">Planned Route</p>
-                      <p className="text-muted-foreground">Hawa Mahal → City Palace</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex space-x-2">
-                    <Button size="sm" className="bg-red-600 hover:bg-red-700">
-                      <Siren className="w-4 h-4 mr-1" />
-                      Emergency Response
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Navigation className="w-4 h-4 mr-1" />
-                      Track Location
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Users className="w-4 h-4 mr-1" />
-                      Contact Tourist
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Tourist Flow Analytics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tourist Flow Analysis</CardTitle>
-                  <CardDescription>Movement patterns and hotspot identification</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-600">Interactive Analytics Dashboard</p>
-                      <p className="text-sm text-gray-500">Heat maps and flow visualization</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Insights */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Brain className="w-5 h-5 text-purple-500" />
-                    <span>AI Insights</span>
-                  </CardTitle>
-                  <CardDescription>Machine learning predictions and anomaly detection</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Eye className="w-4 h-4 text-yellow-600" />
-                      <span className="font-medium text-yellow-800">Pattern Detection</span>
-                    </div>
-                    <p className="text-sm text-yellow-700">
-                      Increased tourist activity detected near Amber Fort. Consider additional security deployment.
-                    </p>
-                  </div>
-                  
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <TrendingUp className="w-4 h-4 text-blue-600" />
-                      <span className="font-medium text-blue-800">Prediction</span>
-                    </div>
-                    <p className="text-sm text-blue-700">
-                      Peak tourist hours predicted: 2-4 PM. Safety score expected to drop by 5-8 points.
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="font-medium text-green-800">Recommendation</span>
-                    </div>
-                    <p className="text-sm text-green-700">
-                      Deploy additional patrol units to Zone C between 2-4 PM for optimal coverage.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="geofence" className="space-y-4">
+          <TabsContent value="patrols" className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-semibold">Geo-fence Management</h2>
+                <h2 className="text-xl font-semibold">Patrol Unit Management</h2>
                 <p className="text-sm text-muted-foreground">
-                  Manage restricted areas and safety zones
+                  Monitor patrol units and their performance
                 </p>
               </div>
               <Button>
-                <MapPin className="w-4 h-4 mr-2" />
-                Create New Zone
+                <Plus className="w-4 h-4 mr-2" />
+                Add Unit
               </Button>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[
-                { name: 'Restricted Area - Amber Fort', type: 'restricted', alerts: 8, status: 'active' },
-                { name: 'Safe Zone - City Palace', type: 'safe', alerts: 0, status: 'active' },
-                { name: 'Tourist Zone - Hawa Mahal', type: 'tourist', alerts: 2, status: 'active' }
-              ].map((zone, index) => (
-                <Card key={index}>
+              {patrolUnits.map(unit => (
+                <Card key={unit.id}>
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="font-semibold">{zone.name}</h3>
-                        <Badge 
-                          variant="secondary" 
-                          className={`mt-1 ${
-                            zone.type === 'restricted' ? 'bg-red-100 text-red-800' :
-                            zone.type === 'safe' ? 'bg-green-100 text-green-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {zone.type.toUpperCase()}
+                        <h3 className="font-semibold text-lg">{unit.callSign}</h3>
+                        <Badge className={unit.status === 'available' ? 'bg-green-500' : 
+                                         unit.status === 'busy' ? 'bg-orange-500' : 
+                                         unit.status === 'responding' ? 'bg-blue-500' : 'bg-gray-500'}>
+                          {unit.status.toUpperCase()}
                         </Badge>
                       </div>
-                      <Badge 
-                        variant={zone.status === 'active' ? 'secondary' : 'outline'}
-                        className={zone.status === 'active' ? 'bg-green-100 text-green-800' : ''}
-                      >
-                        {zone.status.toUpperCase()}
-                      </Badge>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Efficiency</p>
+                        <p className="text-lg font-bold text-green-600">{unit.efficiency}%</p>
+                      </div>
                     </div>
                     
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Recent Alerts:</span>
-                        <span className="font-medium">{zone.alerts}</span>
+                      <div>
+                        <p className="font-medium">Officers:</p>
+                        <p className="text-muted-foreground">{unit.officers.join(', ')}</p>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Tourists in Zone:</span>
-                        <span className="font-medium">{Math.floor(Math.random() * 50) + 10}</span>
+                      <div>
+                        <p className="font-medium">Current Location:</p>
+                        <p className="text-muted-foreground">{unit.location}</p>
+                      </div>
+                      <div>
+                        <p className="font-medium">Last Update:</p>
+                        <p className="text-muted-foreground">{new Date(unit.lastUpdate).toLocaleString()}</p>
                       </div>
                     </div>
 
                     <div className="flex space-x-2 mt-4">
                       <Button size="sm" variant="outline" className="flex-1">
-                        Edit
+                        <MapPin className="w-4 h-4 mr-1" />
+                        Track
                       </Button>
                       <Button size="sm" variant="outline" className="flex-1">
-                        View
+                        <Radio className="w-4 h-4 mr-1" />
+                        Contact
                       </Button>
                     </div>
                   </CardContent>
@@ -821,72 +975,99 @@ export default function AuthorityDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="reports" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-semibold">Reports & Documentation</h2>
-                <p className="text-sm text-muted-foreground">
-                  Generate reports and manage documentation
-                </p>
-              </div>
-              <div className="flex space-x-2">
-                <Button variant="outline">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export Data
-                </Button>
-                <Button>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Generate Report
-                </Button>
-              </div>
-            </div>
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Incident Trends</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                    <div className="text-center">
+                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">Incident trend chart would be displayed here</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[
-                { title: 'Daily Safety Report', type: 'daily', date: '2025-01-04', status: 'ready' },
-                { title: 'Emergency Response Log', type: 'emergency', date: '2025-01-04', status: 'pending' },
-                { title: 'Tourist Statistics', type: 'statistics', date: '2025-01-03', status: 'ready' },
-                { title: 'Geo-fence Violations', type: 'violations', date: '2025-01-04', status: 'ready' },
-                { title: 'AI Analysis Report', type: 'ai', date: '2025-01-03', status: 'ready' },
-                { title: 'Monthly Summary', type: 'monthly', date: '2024-12-31', status: 'archived' }
-              ].map((report, index) => (
-                <Card key={index}>
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-semibold">{report.title}</h3>
-                        <p className="text-sm text-muted-foreground">{report.date}</p>
-                      </div>
-                      <Badge 
-                        variant={report.status === 'ready' ? 'secondary' : 'outline'}
-                        className={
-                          report.status === 'ready' ? 'bg-green-100 text-green-800' :
-                          report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }
-                      >
-                        {report.status.toUpperCase()}
-                      </Badge>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <PieChart className="w-5 h-5" />
+                    <span>Incident Types</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                    <div className="text-center">
+                      <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">Incident type distribution would be displayed here</p>
                     </div>
-                    
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="flex-1"
-                        disabled={report.status !== 'ready'}
-                      >
-                        <Download className="w-4 h-4 mr-1" />
-                        Download
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Server className="w-5 h-5" />
+                    <span>System Status</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span>Database</span>
+                    <Badge className="bg-green-500">Online</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>API Services</span>
+                    <Badge className="bg-green-500">Online</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Authentication</span>
+                    <Badge className="bg-green-500">Online</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>File Storage</span>
+                    <Badge className="bg-yellow-500">Warning</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Settings className="w-5 h-5" />
+                    <span>System Configuration</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start">
+                    <Database className="w-4 h-4 mr-2" />
+                    Database Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Lock className="w-4 h-4 mr-2" />
+                    Security Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Notification Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    System Maintenance
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>

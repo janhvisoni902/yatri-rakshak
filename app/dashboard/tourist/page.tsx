@@ -6,51 +6,95 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card';
 import { Input } from '@/components/input';
-import { Label } from '@/components/label';
-import { Textarea } from '@/components/textarea';
 import { Badge } from '@/components/badge';
-import { Switch } from '@/components/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
 import { 
-  AlertTriangle, 
-  Shield, 
-  Phone, 
   MapPin, 
-  Clock, 
+  AlertTriangle, 
+  Phone, 
+  Camera, 
   Navigation,
+  Shield,
   Heart,
-  Smartphone,
+  Clock,
   Users,
-  Eye,
-  AlertCircle,
-  Siren,
-  Globe,
-  QrCode,
-  Zap,
-  CheckCircle,
-  XCircle,
   Star,
-  Route,
-  Camera,
-  Wifi,
+  Globe,
+  Camera as CameraIcon,
+  MessageCircle,
+  Bell,
+  Settings,
+  User,
+  Calendar,
+  Plane,
+  Hotel,
+  Car,
+  Utensils,
+  Camera as PhotoIcon,
+  Share2,
+  Download,
+  Eye,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Zap,
   Battery,
-  Signal
+  Wifi,
+  Compass,
+  Flag,
+  Map,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Trash2,
+  Send,
+  Mic,
+  Video,
+  Image,
+  FileText,
+  ExternalLink,
+  Activity
 } from 'lucide-react';
 
-interface TouristData {
-  digitalId: string;
+interface TouristStats {
   safetyScore: number;
-  currentLocation: { lat: number; lng: number; };
-  visitDuration: number;
-  itinerary: Array<{ name: string; status: string; }>;
-  emergencyContacts: Array<{ name: string; phone: string; }>;
+  placesVisited: number;
+  photosShared: number;
+  emergencyContacts: number;
+  daysRemaining: number;
+  currentLocation: string;
+}
+
+interface TouristLocation {
+  id: string;
+  name: string;
+  type: 'monument' | 'market' | 'restaurant' | 'hotel' | 'transport' | 'other';
+  address: string;
+  coordinates: { lat: number; lng: number };
+  rating: number;
+  safetyLevel: 'safe' | 'moderate' | 'caution' | 'avoid';
+  visited: boolean;
+  plannedVisit?: string;
+  photos?: string[];
+  notes?: string;
+}
+
+interface EmergencyContact {
+  id: string;
+  name: string;
+  phone: string;
+  relationship: string;
+  isLocal: boolean;
 }
 
 interface SafetyAlert {
   id: string;
-  type: 'geo_fence' | 'anomaly' | 'weather' | 'security';
+  title: string;
   message: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  timestamp: Date;
+  location: string;
+  severity: 'info' | 'warning' | 'danger';
+  timestamp: string;
   acknowledged: boolean;
 }
 
@@ -58,34 +102,97 @@ export default function TouristDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
-  const [isPanicMode, setIsPanicMode] = useState(false);
-  const [isTracking, setIsTracking] = useState(false);
-  const [touristData, setTouristData] = useState<TouristData>({
-    digitalId: 'TID-2025-001234',
+  const [stats, setStats] = useState<TouristStats>({
     safetyScore: 85,
-    currentLocation: { lat: 26.9124, lng: 75.7873 }, // Jaipur coordinates
-    visitDuration: 3,
-    itinerary: [
-      { name: 'Hawa Mahal', status: 'completed' },
-      { name: 'City Palace', status: 'current' },
-      { name: 'Amber Fort', status: 'upcoming' }
-    ],
-    emergencyContacts: [
-      { name: 'Tourist Helpline', phone: '1363' },
-      { name: 'Local Emergency', phone: '112' }
-    ]
+    placesVisited: 12,
+    photosShared: 8,
+    emergencyContacts: 3,
+    daysRemaining: 5,
+    currentLocation: 'Red Fort, Delhi'
   });
+
+  const [locations, setLocations] = useState<TouristLocation[]>([
+    {
+      id: '1',
+      name: 'Red Fort',
+      type: 'monument',
+      address: 'Netaji Subhash Marg, Lal Qila, Old Delhi',
+      coordinates: { lat: 28.6562, lng: 77.2410 },
+      rating: 4.5,
+      safetyLevel: 'safe',
+      visited: true,
+      photos: ['red-fort-1.jpg', 'red-fort-2.jpg'],
+      notes: 'Amazing historical site! Very crowded but safe.'
+    },
+    {
+      id: '2',
+      name: 'Connaught Place',
+      type: 'market',
+      address: 'Connaught Place, New Delhi',
+      coordinates: { lat: 28.6315, lng: 77.2167 },
+      rating: 4.2,
+      safetyLevel: 'moderate',
+      visited: false,
+      plannedVisit: '2025-01-06T10:00:00Z',
+      notes: 'Shopping area - be careful with belongings'
+    },
+    {
+      id: '3',
+      name: 'India Gate',
+      type: 'monument',
+      address: 'Rajpath, India Gate, New Delhi',
+      coordinates: { lat: 28.6129, lng: 77.2295 },
+      rating: 4.3,
+      safetyLevel: 'safe',
+      visited: true,
+      photos: ['india-gate-1.jpg']
+    }
+  ]);
+
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
+    {
+      id: '1',
+      name: 'John Smith',
+      phone: '+1-555-0123',
+      relationship: 'Spouse',
+      isLocal: false
+    },
+    {
+      id: '2',
+      name: 'Rajesh Kumar',
+      phone: '+91-9876543210',
+      relationship: 'Local Guide',
+      isLocal: true
+    },
+    {
+      id: '3',
+      name: 'Hotel Concierge',
+      phone: '+91-11-23456789',
+      relationship: 'Hotel Staff',
+      isLocal: true
+    }
+  ]);
+
   const [safetyAlerts, setSafetyAlerts] = useState<SafetyAlert[]>([
     {
       id: '1',
-      type: 'geo_fence',
-      message: 'You are approaching a high-risk area. Please exercise caution.',
-      severity: 'medium',
-      timestamp: new Date(),
+      title: 'High Crowd Alert',
+      message: 'Red Fort area experiencing unusually high tourist traffic. Exercise caution.',
+      location: 'Red Fort, Delhi',
+      severity: 'warning',
+      timestamp: '2025-01-04T14:30:00Z',
       acknowledged: false
+    },
+    {
+      id: '2',
+      title: 'Weather Update',
+      message: 'Light rain expected in the evening. Carry an umbrella.',
+      location: 'Delhi',
+      severity: 'info',
+      timestamp: '2025-01-04T12:00:00Z',
+      acknowledged: true
     }
   ]);
-  const [currentLocation, setCurrentLocation] = useState({ lat: 26.9124, lng: 75.7873 });
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -93,547 +200,635 @@ export default function TouristDashboard() {
       router.push('/auth/signin');
       return;
     }
-    if (session.user.role !== 'tourist' && session.user.role !== 'local_citizen') {
-      router.push('/dashboard/admin');
+    if (!['tourist', 'public', 'local_citizen'].includes(session.user.role)) {
+      if (session.user.role === 'police') {
+        router.push('/dashboard/police');
+      } else if (['higher_authority', 'admin'].includes(session.user.role)) {
+        router.push('/dashboard/authority');
+      }
       return;
-    }
-    
-    // Get current location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          // Update tourist data location
-          setTouristData(prev => ({
-            ...prev,
-            currentLocation: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            }
-          }));
-        },
-        (error) => console.log('Location access denied')
-      );
     }
   }, [session, status, router]);
 
-  const handlePanicButton = () => {
-    setIsPanicMode(true);
-    // Send emergency alert
-    alert('EMERGENCY ALERT SENT!\n\n✓ Location shared with authorities\n✓ Emergency contacts notified\n✓ Nearest police station alerted\n\nHelp is on the way!');
-    
-    // Simulate emergency response
-    setTimeout(() => {
-      setIsPanicMode(false);
-    }, 5000);
+  const getSafetyColor = (level: string) => {
+    switch (level) {
+      case 'safe': return 'bg-green-500';
+      case 'moderate': return 'bg-yellow-500';
+      case 'caution': return 'bg-orange-500';
+      case 'avoid': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
   };
 
-  const getSafetyScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500';
-    if (score >= 60) return 'text-yellow-500';
-    return 'text-red-500';
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'info': return 'bg-blue-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'danger': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
   };
 
-  const getSafetyScoreLabel = (score: number) => {
-    if (score >= 80) return 'Safe';
-    if (score >= 60) return 'Caution';
-    return 'High Risk';
+  const handleEmergencyCall = () => {
+    // In a real app, this would trigger emergency services
+    alert('Emergency services contacted! Police and medical help are on the way.');
+  };
+
+  const handleShareLocation = () => {
+    // In a real app, this would share current location with emergency contacts
+    alert('Location shared with emergency contacts!');
+  };
+
+  const acknowledgeAlert = (alertId: string) => {
+    setSafetyAlerts(prev => 
+      prev.map(alert => 
+        alert.id === alertId 
+          ? { ...alert, acknowledged: true }
+          : alert
+      )
+    );
   };
 
   if (status === 'loading') {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!session) {
+  if (!session || !['tourist', 'public', 'local_citizen'].includes(session.user.role)) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen defi-animated-bg">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center space-x-2">
-                <Shield className="w-6 h-6 text-blue-500" />
-                <span>Yatri Rakshak</span>
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="container mx-auto px-2 xs:px-4 py-2 xs:py-4">
+          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
+            <div className="w-full xs:w-auto">
+              <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-foreground flex items-center space-x-2">
+                <Globe className="w-5 h-5 xs:w-6 xs:h-6 text-primary" />
+                <span className="defi-text-gradient">Yatri Rakshak</span>
               </h1>
-              <p className="text-muted-foreground">Smart Tourist Safety System</p>
+              <div className="flex flex-wrap items-center gap-1 xs:gap-2 mt-1">
+                <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">Tourist</Badge>
+                <Badge variant="outline" className="border-primary/30 text-foreground text-xs hidden xs:inline-flex">Safety: {stats.safetyScore}/100</Badge>
+                <Badge variant="outline" className="border-primary/30 text-foreground text-xs">{stats.daysRemaining} days left</Badge>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Badge variant="outline" className="flex items-center space-x-1">
-                <QrCode className="w-4 h-4" />
-                <span>{touristData.digitalId}</span>
-              </Badge>
-              <span className="text-sm text-muted-foreground">
-                Welcome, {session.user.name}
+            <div className="flex items-center space-x-1 xs:space-x-2 sm:space-x-4 w-full xs:w-auto justify-between xs:justify-end">
+              <Button 
+                className="defi-button bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30 text-xs xs:text-sm px-2 xs:px-3"
+                size="sm"
+                onClick={handleEmergencyCall}
+              >
+                <Phone className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                <span className="hidden xs:inline">Emergency</span>
+                <span className="xs:hidden">SOS</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs xs:text-sm px-2 xs:px-3 hidden sm:flex"
+                onClick={handleShareLocation}
+              >
+                <Share2 className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                <span className="hidden md:inline">Share Location</span>
+                <span className="md:hidden">Share</span>
+              </Button>
+              <span className="text-xs xs:text-sm text-foreground/70 hidden md:inline">
+                {session.user.name}
               </span>
               <Button 
                 variant="outline" 
+                size="sm"
+                className="border-border/50 bg-background/50 text-foreground hover:bg-background/80 text-xs xs:text-sm px-2 xs:px-3"
                 onClick={() => router.push('/api/auth/signout')}
               >
-                Sign Out
+                <span className="hidden xs:inline">Sign Out</span>
+                <span className="xs:hidden">Exit</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Emergency Panic Button - Always Visible */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          size="lg"
-          className={`w-16 h-16 rounded-full shadow-lg transition-all duration-300 ${
-            isPanicMode 
-              ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
-              : 'bg-red-500 hover:bg-red-600'
-          }`}
-          onClick={handlePanicButton}
-          disabled={isPanicMode}
-        >
-          <Siren className="w-8 h-8" />
-        </Button>
-        {isPanicMode && (
-          <div className="absolute -top-16 -left-20 bg-red-500 text-white px-4 py-2 rounded-lg animate-bounce">
-            Emergency Alert Sent!
-          </div>
-        )}
-      </div>
+      <div className="container mx-auto px-2 xs:px-4 py-3 xs:py-6">
+        {/* Statistics Cards */}
+        <div className="grid gap-2 xs:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 xs:mb-6">
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Safety Score</p>
+                  <p className="text-lg xs:text-2xl font-bold text-green-400">{stats.safetyScore}/100</p>
+                </div>
+                <Shield className="w-4 h-4 xs:w-6 xs:h-6 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
 
-      <div className="container mx-auto px-4 py-6">
-        {/* Safety Alerts */}
-        {safetyAlerts.filter(alert => !alert.acknowledged).length > 0 && (
-          <div className="mb-6">
-            {safetyAlerts.filter(alert => !alert.acknowledged).map(alert => (
-              <Card key={alert.id} className={`border-l-4 ${
-                alert.severity === 'critical' ? 'border-l-red-500' :
-                alert.severity === 'high' ? 'border-l-orange-500' :
-                alert.severity === 'medium' ? 'border-l-yellow-500' : 'border-l-blue-500'
-              }`}>
-                <CardContent className="pt-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-start space-x-3">
-                      <AlertTriangle className={`w-5 h-5 mt-0.5 ${
-                        alert.severity === 'critical' ? 'text-red-500' :
-                        alert.severity === 'high' ? 'text-orange-500' :
-                        alert.severity === 'medium' ? 'text-yellow-500' : 'text-blue-500'
-                      }`} />
-                      <div>
-                        <p className="font-medium">{alert.message}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {alert.timestamp.toLocaleTimeString()}
-                        </p>
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Places</p>
+                  <p className="text-lg xs:text-2xl font-bold text-blue-400">{stats.placesVisited}</p>
+                </div>
+                <MapPin className="w-4 h-4 xs:w-6 xs:h-6 text-blue-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Photos</p>
+                  <p className="text-lg xs:text-2xl font-bold text-purple-400">{stats.photosShared}</p>
+                </div>
+                <PhotoIcon className="w-4 h-4 xs:w-6 xs:h-6 text-purple-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Contacts</p>
+                  <p className="text-lg xs:text-2xl font-bold text-orange-400">{stats.emergencyContacts}</p>
+                </div>
+                <Users className="w-4 h-4 xs:w-6 xs:h-6 text-orange-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Days Left</p>
+                  <p className="text-lg xs:text-2xl font-bold text-red-400">{stats.daysRemaining}</p>
+                </div>
+                <Calendar className="w-4 h-4 xs:w-6 xs:h-6 text-red-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="defi-card hover:defi-glow transition-all duration-300 col-span-2 sm:col-span-1">
+            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Location</p>
+                  <p className="text-xs xs:text-sm font-bold text-foreground/80 truncate">{stats.currentLocation}</p>
+                </div>
+                <Compass className="w-4 h-4 xs:w-6 xs:h-6 text-foreground/60 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 xs:space-y-4">
+          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+            <TabsTrigger value="overview" className="text-xs xs:text-sm py-2 xs:py-2.5">Overview</TabsTrigger>
+            <TabsTrigger value="places" className="text-xs xs:text-sm py-2 xs:py-2.5">Places</TabsTrigger>
+            <TabsTrigger value="safety" className="text-xs xs:text-sm py-2 xs:py-2.5">Safety</TabsTrigger>
+            <TabsTrigger value="emergency" className="text-xs xs:text-sm py-2 xs:py-2.5">Emergency</TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs xs:text-sm py-2 xs:py-2.5">Profile</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-3 xs:space-y-4">
+            <div className="grid gap-3 xs:gap-6 md:grid-cols-2">
+              {/* Safety Alerts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Bell className="w-5 h-5" />
+                    <span>Safety Alerts</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 xs:space-y-3">
+                  {safetyAlerts.filter(alert => !alert.acknowledged).map(alert => (
+                    <div key={alert.id} className="p-2 xs:p-3 border rounded-lg">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col xs:flex-row xs:items-center space-y-1 xs:space-y-0 xs:space-x-2 mb-1">
+                            <Badge className={`${getSeverityColor(alert.severity)} text-xs`}>
+                              {alert.severity.toUpperCase()}
+                            </Badge>
+                            <h4 className="font-medium text-sm xs:text-base truncate">{alert.title}</h4>
+                          </div>
+                          <p className="text-xs xs:text-sm text-muted-foreground mb-2 line-clamp-2">{alert.message}</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {alert.location} • {new Date(alert.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="flex-shrink-0 h-8 w-8 xs:h-auto xs:w-auto xs:px-3"
+                          onClick={() => acknowledgeAlert(alert.id)}
+                        >
+                          <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4" />
+                          <span className="hidden xs:inline ml-1">OK</span>
+                        </Button>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSafetyAlerts(prev => 
-                          prev.map(a => a.id === alert.id ? { ...a, acknowledged: true } : a)
-                        );
-                      }}
-                    >
-                      Acknowledge
+                  ))}
+                  {safetyAlerts.filter(alert => !alert.acknowledged).length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      No active safety alerts
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Zap className="w-5 h-5" />
+                    <span>Quick Actions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-2 xs:gap-3">
+                    <Button className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Camera className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Report Incident</span>
+                      <span className="xs:hidden">Report</span>
+                    </Button>
+                    <Button variant="outline" className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Map className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Find Safe Places</span>
+                      <span className="xs:hidden">Safe Places</span>
+                    </Button>
+                    <Button variant="outline" className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Phone className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Call Police</span>
+                      <span className="xs:hidden">Police</span>
+                    </Button>
+                    <Button variant="outline" className="h-16 xs:h-20 flex-col space-y-1 xs:space-y-2 text-xs xs:text-sm">
+                      <Share2 className="w-4 h-4 xs:w-6 xs:h-6" />
+                      <span className="hidden xs:inline">Share Location</span>
+                      <span className="xs:hidden">Share</span>
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 rounded-lg bg-muted p-1 mb-6 overflow-x-auto">
-          {[
-            { key: 'overview', label: 'Overview', icon: Eye },
-            { key: 'safety', label: 'Safety Status', icon: Shield },
-            { key: 'itinerary', label: 'My Journey', icon: Route },
-            { key: 'emergency', label: 'Emergency', icon: AlertCircle },
-            { key: 'settings', label: 'Settings', icon: Heart }
-          ].map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center space-x-2 rounded-md px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                activeTab === tab.key
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        {activeTab === 'overview' && (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Safety Score */}
+            {/* Recent Activity */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-blue-500" />
-                  <span>Safety Score</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <div className={`text-4xl font-bold ${getSafetyScoreColor(touristData.safetyScore)}`}>
-                    {touristData.safetyScore}
-                  </div>
-                  <Badge 
-                    variant="secondary" 
-                    className={`mt-2 ${getSafetyScoreColor(touristData.safetyScore)}`}
-                  >
-                    {getSafetyScoreLabel(touristData.safetyScore)}
-                  </Badge>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Based on location, time, and activity patterns
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Current Location */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Navigation className="w-5 h-5 text-green-500" />
-                  <span>Current Location</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p className="font-medium">Jaipur, Rajasthan</p>
-                  <p className="text-sm text-muted-foreground">
-                    Tourist Zone - Safe Area
-                  </p>
-                  <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                    <MapPin className="w-3 h-3" />
-                    <span>{currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs">Live Tracking</span>
-                    <Switch 
-                      checked={isTracking}
-                      onCheckedChange={setIsTracking}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Digital ID */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <QrCode className="w-5 h-5 text-purple-500" />
-                  <span>Digital Tourist ID</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <QrCode className="w-12 h-12" />
-                </div>
-                <p className="text-sm font-mono">{touristData.digitalId}</p>
-                <Badge variant="secondary" className="mt-2">
-                  Verified ✓
-                </Badge>
-              </CardContent>
-            </Card>
-
-            {/* Quick Stats */}
-            <Card className="md:col-span-2 lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Travel Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-500">{touristData.visitDuration}</div>
-                    <p className="text-sm text-muted-foreground">Days in India</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-500">5</div>
-                    <p className="text-sm text-muted-foreground">Places Visited</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-500">0</div>
-                    <p className="text-sm text-muted-foreground">Safety Incidents</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-yellow-500">2</div>
-                    <p className="text-sm text-muted-foreground">Upcoming Destinations</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {activeTab === 'safety' && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Area Risk Assessment */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Area Assessment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span>Crime Rate</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">Low</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Tourist Density</span>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">High</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Weather Conditions</span>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">Good</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Local Alerts</span>
-                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">1 Active</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Emergency Contacts */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Phone className="w-5 h-5 text-red-500" />
-                  <span>Emergency Contacts</span>
+                  <Activity className="w-5 h-5" />
+                  <span>Recent Activity</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {touristData.emergencyContacts.map((contact, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span className="font-medium">{contact.name}</span>
-                      <Button size="sm" variant="outline">
-                        <Phone className="w-4 h-4 mr-1" />
-                        {contact.phone}
-                      </Button>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">Visited Red Fort</p>
+                      <p className="text-sm text-muted-foreground">2 hours ago</p>
                     </div>
-                  ))}
-                  <Button className="w-full mt-4" variant="destructive">
-                    <Siren className="w-4 h-4 mr-2" />
-                    EMERGENCY SOS
+                    <Badge variant="outline">Safe</Badge>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <PhotoIcon className="w-5 h-5 text-blue-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">Shared photos from India Gate</p>
+                      <p className="text-sm text-muted-foreground">4 hours ago</p>
+                    </div>
+                    <Badge variant="outline">2 photos</Badge>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                    <Bell className="w-5 h-5 text-yellow-500" />
+                    <div className="flex-1">
+                      <p className="font-medium">Received safety alert</p>
+                      <p className="text-sm text-muted-foreground">6 hours ago</p>
+                    </div>
+                    <Badge variant="outline">Warning</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="places" className="space-y-3 xs:space-y-4">
+            <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-3 xs:space-y-0">
+              <div className="w-full xs:w-auto">
+                <h2 className="text-lg xs:text-xl font-semibold">Places & Attractions</h2>
+                <p className="text-xs xs:text-sm text-muted-foreground">
+                  Discover and track your visited places
+                </p>
+              </div>
+              <div className="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 w-full xs:w-auto">
+                <Input placeholder="Search places..." className="w-full xs:w-48 lg:w-64" />
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm" className="flex-1 xs:flex-none">
+                    <Filter className="w-3 h-3 xs:w-4 xs:h-4" />
+                    <span className="ml-1 xs:hidden">Filter</span>
+                  </Button>
+                  <Button size="sm" className="flex-1 xs:flex-none">
+                    <Plus className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+                    <span className="hidden xs:inline">Add Place</span>
+                    <span className="xs:hidden">Add</span>
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Safety Features */}
-            <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Safety Features Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <Navigation className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                    <p className="text-sm font-medium">GPS Tracking</p>
-                    <Badge variant="secondary" className="mt-1 bg-green-100 text-green-800">Active</Badge>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <Shield className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                    <p className="text-sm font-medium">Geo-Fencing</p>
-                    <Badge variant="secondary" className="mt-1 bg-blue-100 text-blue-800">Enabled</Badge>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <Eye className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                    <p className="text-sm font-medium">AI Monitoring</p>
-                    <Badge variant="secondary" className="mt-1 bg-purple-100 text-purple-800">Active</Badge>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <Users className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-                    <p className="text-sm font-medium">Family Sharing</p>
-                    <Badge variant="secondary" className="mt-1 bg-orange-100 text-orange-800">Connected</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+            <div className="grid gap-3 xs:gap-4">
+              {locations.map(location => (
+                <Card key={location.id} className="border-l-4 border-l-blue-500 overflow-hidden">
+                  <CardContent className="pt-3 xs:pt-6 p-3 xs:p-6">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start space-y-3 lg:space-y-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col xs:flex-row xs:items-center space-y-2 xs:space-y-0 xs:space-x-3 mb-3">
+                          <h3 className="font-semibold text-base xs:text-lg truncate">{location.name}</h3>
+                          <div className="flex items-center space-x-2">
+                            <Badge className={`${getSafetyColor(location.safetyLevel)} text-xs`}>
+                              {location.safetyLevel.toUpperCase()}
+                            </Badge>
+                            <div className="flex items-center space-x-1">
+                              <Star className="w-3 h-3 xs:w-4 xs:h-4 text-yellow-500 fill-current" />
+                              <span className="text-xs xs:text-sm">{location.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm xs:text-base break-words">{location.address}</p>
+                        
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-4 text-xs xs:text-sm text-muted-foreground">
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0" />
+                            <span className="truncate">{location.type}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <CheckCircle className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0" />
+                            <span className="truncate">{location.visited ? 'Visited' : 'Not visited'}</span>
+                          </div>
+                          {location.photos && (
+                            <div className="flex items-center space-x-1">
+                              <PhotoIcon className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0" />
+                              <span className="truncate">{location.photos.length} photos</span>
+                            </div>
+                          )}
+                        </div>
 
-        {activeTab === 'itinerary' && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Route className="w-5 h-5 text-blue-500" />
-                  <span>My Journey</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {touristData.itinerary.map((destination, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-4 border rounded-lg">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        destination.status === 'completed' ? 'bg-green-100 text-green-600' :
-                        destination.status === 'current' ? 'bg-blue-100 text-blue-600' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {destination.status === 'completed' ? <CheckCircle className="w-4 h-4" /> :
-                         destination.status === 'current' ? <Navigation className="w-4 h-4" /> :
-                         <Clock className="w-4 h-4" />}
+                        {location.notes && (
+                          <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/30 rounded">
+                            <p className="text-xs xs:text-sm break-words">
+                              <strong>Notes:</strong> {location.notes}
+                            </p>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium">{destination.name}</p>
-                        <p className="text-sm text-muted-foreground capitalize">{destination.status}</p>
+
+                      <div className="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:ml-4 overflow-x-auto lg:overflow-x-visible">
+                        <Button size="sm" className="flex-shrink-0 text-xs">
+                          <Navigation className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Navigate</span>
+                          <span className="xs:hidden">Nav</span>
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-shrink-0 text-xs">
+                          <PhotoIcon className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Add Photo</span>
+                          <span className="xs:hidden">Photo</span>
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-shrink-0 text-xs">
+                          <Edit className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Edit Notes</span>
+                          <span className="xs:hidden">Edit</span>
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-shrink-0 text-xs">
+                          <Share2 className="w-3 h-3 xs:w-4 xs:h-4 mr-1" />
+                          <span className="hidden xs:inline">Share</span>
+                          <span className="xs:hidden">Share</span>
+                        </Button>
                       </div>
-                      {destination.status === 'current' && (
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                          Current Location
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="safety" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Shield className="w-5 h-5" />
+                    <span>Safety Tips</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                    <h4 className="font-medium text-green-800 dark:text-green-200 mb-2">
+                      General Safety Tips
+                    </h4>
+                    <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                      <li>• Keep emergency contacts handy</li>
+                      <li>• Share your location with trusted contacts</li>
+                      <li>• Avoid isolated areas after dark</li>
+                      <li>• Keep copies of important documents</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                    <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                      Tourist-Specific Tips
+                    </h4>
+                    <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                      <li>• Use registered tour guides</li>
+                      <li>• Be cautious with street vendors</li>
+                      <li>• Keep valuables in hotel safe</li>
+                      <li>• Learn basic local phrases</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span>Emergency Procedures</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <Button className="w-full justify-start" variant="destructive">
+                      <Phone className="w-4 h-4 mr-2" />
+                      Call Police (100)
+                    </Button>
+                    <Button className="w-full justify-start" variant="destructive">
+                      <Phone className="w-4 h-4 mr-2" />
+                      Call Medical (108)
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Send SOS Message
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline">
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Share Live Location
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="emergency" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Users className="w-5 h-5" />
+                    <span>Emergency Contacts</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {emergencyContacts.map(contact => (
+                    <div key={contact.id} className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">{contact.name}</h4>
+                          <p className="text-sm text-muted-foreground">{contact.relationship}</p>
+                          <p className="text-sm text-muted-foreground">{contact.phone}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Phone className="w-4 h-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <MessageCircle className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      {contact.isLocal && (
+                        <Badge className="bg-green-100 text-green-800 mt-2">
+                          Local Contact
                         </Badge>
                       )}
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+                </CardContent>
+              </Card>
 
-        {activeTab === 'emergency' && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Emergency Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-red-600">Emergency Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
-                  className="w-full" 
-                  variant="destructive" 
-                  size="lg"
-                  onClick={handlePanicButton}
-                >
-                  <Siren className="w-5 h-5 mr-2" />
-                  PANIC BUTTON
-                </Button>
-                <Button className="w-full" variant="outline">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Call Tourist Helpline (1363)
-                </Button>
-                <Button className="w-full" variant="outline">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Share Live Location
-                </Button>
-                <Button className="w-full" variant="outline">
-                  <Camera className="w-4 h-4 mr-2" />
-                  Quick Photo Evidence
-                </Button>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <AlertCircle className="w-5 h-5" />
+                    <span>Emergency Services</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">Police</h4>
+                          <p className="text-sm text-muted-foreground">Emergency response</p>
+                        </div>
+                        <Button size="sm" variant="destructive">
+                          <Phone className="w-4 h-4 mr-1" />
+                          100
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">Medical Emergency</h4>
+                          <p className="text-sm text-muted-foreground">Ambulance service</p>
+                        </div>
+                        <Button size="sm" variant="destructive">
+                          <Phone className="w-4 h-4 mr-1" />
+                          108
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">Fire Department</h4>
+                          <p className="text-sm text-muted-foreground">Fire emergency</p>
+                        </div>
+                        <Button size="sm" variant="destructive">
+                          <Phone className="w-4 h-4 mr-1" />
+                          101
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-            {/* Quick Info */}
-            <Card>
+          <TabsContent value="profile" className="space-y-4">
+            <Card className="max-w-2xl mx-auto">
               <CardHeader>
-                <CardTitle>Emergency Information</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <User className="w-5 h-5" />
+                  <span>Tourist Profile</span>
+                </CardTitle>
+                <CardDescription>
+                  Manage your tourist information and preferences
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-800">
-                    <strong>In case of emergency:</strong><br />
-                    • Press the panic button<br />
-                    • Your location will be shared automatically<br />
-                    • Nearest authorities will be notified<br />
-                    • Emergency contacts will receive alerts
-                  </p>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Name</label>
+                    <Input value={session.user.name} disabled />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email</label>
+                    <Input value={session.user.email} disabled />
+                  </div>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Nearest Hospital:</span>
-                    <span className="font-medium">2.3 km</span>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Current Location</label>
+                  <Input value={stats.currentLocation} />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Safety Score</label>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{ width: `${stats.safetyScore}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-medium">{stats.safetyScore}/100</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Police Station:</span>
-                    <span className="font-medium">1.8 km</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tourist Help Center:</span>
-                    <span className="font-medium">0.5 km</span>
-                  </div>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Travel Report
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Privacy Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Privacy & Tracking</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Location Tracking</p>
-                    <p className="text-sm text-muted-foreground">Allow real-time location sharing</p>
-                  </div>
-                  <Switch checked={isTracking} onCheckedChange={setIsTracking} />
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Family Sharing</p>
-                    <p className="text-sm text-muted-foreground">Share location with family</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Emergency Auto-Share</p>
-                    <p className="text-sm text-muted-foreground">Auto-share in emergencies</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Notifications */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Safety Alerts</p>
-                    <p className="text-sm text-muted-foreground">Geo-fence and safety warnings</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Journey Updates</p>
-                    <p className="text-sm text-muted-foreground">Itinerary reminders</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">Weather Alerts</p>
-                    <p className="text-sm text-muted-foreground">Weather warnings</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
