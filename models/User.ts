@@ -8,6 +8,14 @@ export interface IUser extends Document {
   role: UserRole;
   badgeNumber?: string;
   department?: string;
+  phone?: string;
+  emergencyContacts?: Array<{
+    id: string;
+    name: string;
+    phone: string;
+    relationship: string;
+    isLocal: boolean;
+  }>;
   verificationStatus: 'pending' | 'verified' | 'rejected';
   kycData?: {
     fullName: string;
@@ -70,6 +78,35 @@ const UserSchema: Schema = new Schema({
   department: {
     type: String,
   },
+  phone: {
+    type: String,
+    maxlength: [20, 'Phone number cannot be more than 20 characters'],
+  },
+  emergencyContacts: [{
+    id: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true,
+      maxlength: [100, 'Contact name cannot be more than 100 characters']
+    },
+    phone: {
+      type: String,
+      required: true,
+      maxlength: [20, 'Contact phone cannot be more than 20 characters']
+    },
+    relationship: {
+      type: String,
+      required: true,
+      maxlength: [50, 'Relationship cannot be more than 50 characters']
+    },
+    isLocal: {
+      type: Boolean,
+      default: false
+    }
+  }],
   verificationStatus: {
     type: String,
     enum: ['pending', 'verified', 'rejected'],
