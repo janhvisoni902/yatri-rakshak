@@ -1,0 +1,181 @@
+---
+name: yatrirakshak-network
+version: 1.0.0
+description: YatriRakshak Tourist Safety Monitoring Network
+
+# Network Configuration
+client:
+  organization: TourismDeptMSP
+  credentialStore:
+    path: ./tmp/hfc-kvs
+    cryptoStore:
+      path: ./tmp/hfc-cvs
+  clientPrivateKeyPath: ../organizations/peerOrganizations/tourism-dept.yatrirakshak.com/users/User1@tourism-dept.yatrirakshak.com/msp/keystore
+  clientSignedCertPath: ../organizations/peerOrganizations/tourism-dept.yatrirakshak.com/users/User1@tourism-dept.yatrirakshak.com/msp/signcerts
+
+# Channels Configuration
+channels:
+  tourist-identity:
+    orderers:
+      - orderer.yatrirakshak.com
+    peers:
+      peer0.tourism-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.police-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.entry-points.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+  location-tracking:
+    orderers:
+      - orderer.yatrirakshak.com
+    peers:
+      peer0.tourism-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.police-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+  incident-management:
+    orderers:
+      - orderer.yatrirakshak.com
+    peers:
+      peer0.police-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.tourism-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+  safety-scoring:
+    orderers:
+      - orderer.yatrirakshak.com
+    peers:
+      peer0.tourism-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+      peer0.police-dept.yatrirakshak.com:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
+
+# Organizations Configuration
+organizations:
+  TourismDeptMSP:
+    mspid: TourismDeptMSP
+    adminPrivateKeyPath: ../organizations/peerOrganizations/tourism-dept.yatrirakshak.com/users/Admin@tourism-dept.yatrirakshak.com/msp/keystore
+    adminSignedCertPath: ../organizations/peerOrganizations/tourism-dept.yatrirakshak.com/users/Admin@tourism-dept.yatrirakshak.com/msp/signcerts
+    peers:
+      - peer0.tourism-dept.yatrirakshak.com
+    certificateAuthorities:
+      - ca.tourism-dept.yatrirakshak.com
+
+  PoliceDeptMSP:
+    mspid: PoliceDeptMSP
+    adminPrivateKeyPath: ../organizations/peerOrganizations/police-dept.yatrirakshak.com/users/Admin@police-dept.yatrirakshak.com/msp/keystore
+    adminSignedCertPath: ../organizations/peerOrganizations/police-dept.yatrirakshak.com/users/Admin@police-dept.yatrirakshak.com/msp/signcerts
+    peers:
+      - peer0.police-dept.yatrirakshak.com
+    certificateAuthorities:
+      - ca.police-dept.yatrirakshak.com
+
+  EntryPointsMSP:
+    mspid: EntryPointsMSP
+    adminPrivateKeyPath: ../organizations/peerOrganizations/entry-points.yatrirakshak.com/users/Admin@entry-points.yatrirakshak.com/msp/keystore
+    adminSignedCertPath: ../organizations/peerOrganizations/entry-points.yatrirakshak.com/users/Admin@entry-points.yatrirakshak.com/msp/signcerts
+    peers:
+      - peer0.entry-points.yatrirakshak.com
+    certificateAuthorities:
+      - ca.entry-points.yatrirakshak.com
+
+# Orderers Configuration
+orderers:
+  orderer.yatrirakshak.com:
+    url: grpcs://localhost:7050
+    tlsCACerts:
+      path: ../organizations/ordererOrganizations/yatrirakshak.com/orderers/orderer.yatrirakshak.com/msp/tlscacerts/tlsca.yatrirakshak.com-cert.pem
+    grpcOptions:
+      ssl-target-name-override: orderer.yatrirakshak.com
+      hostnameOverride: orderer.yatrirakshak.com
+
+# Peers Configuration
+peers:
+  peer0.tourism-dept.yatrirakshak.com:
+    url: grpcs://localhost:7051
+    tlsCACerts:
+      path: ../organizations/peerOrganizations/tourism-dept.yatrirakshak.com/peers/peer0.tourism-dept.yatrirakshak.com/tls/ca.crt
+    grpcOptions:
+      ssl-target-name-override: peer0.tourism-dept.yatrirakshak.com
+      hostnameOverride: peer0.tourism-dept.yatrirakshak.com
+
+  peer0.police-dept.yatrirakshak.com:
+    url: grpcs://localhost:9051
+    tlsCACerts:
+      path: ../organizations/peerOrganizations/police-dept.yatrirakshak.com/peers/peer0.police-dept.yatrirakshak.com/tls/ca.crt
+    grpcOptions:
+      ssl-target-name-override: peer0.police-dept.yatrirakshak.com
+      hostnameOverride: peer0.police-dept.yatrirakshak.com
+
+  peer0.entry-points.yatrirakshak.com:
+    url: grpcs://localhost:11051
+    tlsCACerts:
+      path: ../organizations/peerOrganizations/entry-points.yatrirakshak.com/peers/peer0.entry-points.yatrirakshak.com/tls/ca.crt
+    grpcOptions:
+      ssl-target-name-override: peer0.entry-points.yatrirakshak.com
+      hostnameOverride: peer0.entry-points.yatrirakshak.com
+
+# Certificate Authorities Configuration
+certificateAuthorities:
+  ca.tourism-dept.yatrirakshak.com:
+    url: https://localhost:7054
+    caName: ca-tourism-dept
+    tlsCACerts:
+      path: ../organizations/peerOrganizations/tourism-dept.yatrirakshak.com/ca/ca.tourism-dept.yatrirakshak.com-cert.pem
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+
+  ca.police-dept.yatrirakshak.com:
+    url: https://localhost:8054
+    caName: ca-police-dept
+    tlsCACerts:
+      path: ../organizations/peerOrganizations/police-dept.yatrirakshak.com/ca/ca.police-dept.yatrirakshak.com-cert.pem
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+
+  ca.entry-points.yatrirakshak.com:
+    url: https://localhost:9054
+    caName: ca-entry-points
+    tlsCACerts:
+      path: ../organizations/peerOrganizations/entry-points.yatrirakshak.com/ca/ca.entry-points.yatrirakshak.com-cert.pem
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
