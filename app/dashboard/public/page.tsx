@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useIncidentTrends, useResponseTimeData, useIncidentTypeData, useSafetyTrends } from '@/hooks/useAnalytics';
 import { Button } from '@/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card';
 import { Input } from '@/components/input';
@@ -18,13 +19,49 @@ import {
   Clock, 
   Navigation,
   Heart,
-  Smartphone,
   Users,
-  Eye,
-  AlertCircle,
+  Star,
   Globe,
-  QrCode
+  Camera,
+  MessageCircle,
+  Bell,
+  Settings,
+  User,
+  Calendar,
+  Plane,
+  Hotel,
+  Car,
+  Utensils,
+  Share2,
+  Download,
+  Eye,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Zap,
+  Battery,
+  Wifi,
+  Compass,
+  Flag,
+  Map,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Trash2,
+  Send,
+  Mic,
+  Video,
+  Image,
+  ExternalLink,
+  Activity,
+  BarChart3,
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react';
+import BarChartComponent from '@/components/charts/BarChart';
+import LineChartComponent from '@/components/charts/LineChart';
+import IndiaMapComponent from '@/components/charts/IndiaMap';
 
 
 interface Incident {
@@ -105,6 +142,12 @@ export default function TouristDashboard() {
     ]);
   }, []);
 
+  // Dynamic analytics data
+  const { data: incidentTrendData, loading: incidentTrendsLoading, error: incidentTrendsError } = useIncidentTrends();
+  const { data: responseTimeData, loading: responseTimeLoading, error: responseTimeError } = useResponseTimeData();
+  const { data: incidentTypeData, loading: incidentTypesLoading, error: incidentTypesError } = useIncidentTypeData();
+  const { data: safetyTrendData, loading: safetyTrendsLoading, error: safetyTrendsError } = useSafetyTrends();
+
   const handleReportSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would call the API to submit the incident report
@@ -181,6 +224,7 @@ export default function TouristDashboard() {
         <div className="flex space-x-1 rounded-lg bg-muted p-1 mb-4 xs:mb-6 overflow-x-auto">
           {[
             { key: 'overview', label: 'Overview', icon: FileText },
+            { key: 'analytics', label: 'Analytics', icon: BarChart3 },
             { key: 'report', label: 'Report Incident', icon: AlertTriangle },
             { key: 'status', label: 'My Reports', icon: Clock }
           ].map((tab) => (
@@ -195,7 +239,7 @@ export default function TouristDashboard() {
             >
               <tab.icon className="w-3 h-3 xs:w-4 xs:h-4" />
               <span className="hidden xs:inline">{tab.label}</span>
-              <span className="xs:hidden">{tab.key === 'overview' ? 'Home' : tab.key === 'report' ? 'Report' : 'Status'}</span>
+              <span className="xs:hidden">{tab.key === 'overview' ? 'Home' : tab.key === 'analytics' ? 'Charts' : tab.key === 'report' ? 'Report' : 'Status'}</span>
             </button>
           ))}
         </div>
@@ -352,6 +396,102 @@ export default function TouristDashboard() {
               </form>
             </CardContent>
           </Card>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Safety Trends */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5" />
+                  <span>Weekly Safety Trends</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {safetyTrendsLoading ? (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : safetyTrendsError ? (
+                  <div className="flex items-center justify-center h-[300px] text-red-500">
+                    <AlertCircle className="w-6 h-6 mr-2" />
+                    <span>Error loading safety trends</span>
+                  </div>
+                ) : (
+                  <LineChartComponent 
+                    data={safetyTrendData || []}
+                    dataKey="value"
+                    strokeColor="#10B981"
+                    height={300}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Response Time Improvement */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="w-5 h-5" />
+                  <span>Response Time Trends</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {responseTimeLoading ? (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : responseTimeError ? (
+                  <div className="flex items-center justify-center h-[300px] text-red-500">
+                    <AlertCircle className="w-6 h-6 mr-2" />
+                    <span>Error loading response time data</span>
+                  </div>
+                ) : (
+                  <LineChartComponent 
+                    data={responseTimeData || []}
+                    dataKey="value"
+                    strokeColor="#3B82F6"
+                    height={300}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Incident Types */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Incident Distribution</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {incidentTypesLoading ? (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : incidentTypesError ? (
+                  <div className="flex items-center justify-center h-[300px] text-red-500">
+                    <AlertCircle className="w-6 h-6 mr-2" />
+                    <span>Error loading incident types</span>
+                  </div>
+                ) : (
+                  <BarChartComponent 
+                    data={incidentTypeData || []}
+                    height={300}
+                  />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Regional Safety Map */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Regional Safety Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <IndiaMapComponent />
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {activeTab === 'status' && (

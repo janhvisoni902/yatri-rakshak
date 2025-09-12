@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useIncidentTrends, useResponseTimeData, useIncidentTypeData } from '@/hooks/useAnalytics';
 import { Button } from '@/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card';
 import { Input } from '@/components/input';
@@ -13,6 +14,7 @@ import {
   AlertTriangle, 
   Users, 
   Shield,
+  ShieldCheck,
   TrendingUp,
   TrendingDown,
   Activity,
@@ -99,9 +101,11 @@ import {
   Clock as ClockIcon,
   Timer,
   Hourglass,
-
- 
 } from 'lucide-react';
+import BarChartComponent from '@/components/charts/BarChart';
+import LineChartComponent from '@/components/charts/LineChart';
+import IndiaMapComponent from '@/components/charts/IndiaMap';
+import UserDropdown from '@/components/UserDropdown';
 
 interface AuthorityStats {
   totalIncidents: number;
@@ -328,6 +332,11 @@ export default function AuthorityDashboard() {
     }
   ]);
 
+  // Dynamic analytics data
+  const { data: incidentTrendData, loading: incidentTrendsLoading, error: incidentTrendsError } = useIncidentTrends();
+  const { data: responseTimeData, loading: responseTimeLoading, error: responseTimeError } = useResponseTimeData();
+  const { data: incidentTypeData, loading: incidentTypesLoading, error: incidentTypesError } = useIncidentTypeData();
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -428,53 +437,30 @@ export default function AuthorityDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-40">
+    <div className="min-h-screen bg-background scroll-optimized no-flicker">
+      <header className="bg-card border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center space-x-2">
-                <Eye className="w-6 h-6 text-purple-500" />
-                <span>Yatri Rakshak</span>
-              </h1>
-              <div className="flex items-center space-x-2">
-                <Badge className="bg-purple-100 text-purple-800">
-                  {session.user.role === 'admin' ? 'Administrator' : 
-                   session.user.role === 'higher_authority' ? 'Higher Authority' : 
-                   'Tourism Department'}
-                </Badge>
-                {session.user.department && (
-                  <Badge variant="outline">{session.user.department}</Badge>
-                )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <ShieldCheck className="w-8 h-8 text-primary" />
+              <div>
+                <h1 className="text-2xl font-bold">Higher Authority Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Central Command & Control</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Export Report
-              </Button>
-              <Button variant="outline" size="sm">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {session.user.name}
-              </span>
-              <Button 
-                variant="outline" 
-                onClick={() => router.push('/api/auth/signout')}
-              >
-                Sign Out
-              </Button>
+              <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+                Active Monitoring
+              </Badge>
+              <UserDropdown />
             </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6">
-        {/* Statistics Cards */}
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-8 mb-6">
+      <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -499,14 +485,14 @@ export default function AuthorityDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="pt-6">
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 sm:pt-4 lg:pt-6 pb-3 sm:pb-4 lg:pb-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Patrols</p>
-                  <p className="text-2xl font-bold text-orange-600">{stats.activePatrols}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-foreground/70 truncate">Active Cases</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400">{stats.totalIncidents - stats.resolvedIncidents}</p>
                 </div>
-                <Car className="w-6 h-6 text-orange-500" />
+                <Eye className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
@@ -523,14 +509,26 @@ export default function AuthorityDashboard() {
             </CardContent>
           </Card>
 
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 sm:pt-4 lg:pt-6 pb-3 sm:pb-4 lg:pb-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-foreground/70 truncate">Response Time</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-400">{stats.responseTime}</p>
+                </div>
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-blue-400 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Response Time</p>
-                  <p className="text-2xl font-bold text-red-600">{stats.responseTime}m</p>
+                  <p className="text-sm font-medium text-muted-foreground">Active Patrols</p>
+                  <p className="text-2xl font-bold text-orange-600">{stats.activePatrols}</p>
                 </div>
-                <Clock className="w-6 h-6 text-red-500" />
+                <Car className="w-6 h-6 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -573,17 +571,29 @@ export default function AuthorityDashboard() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="incidents">Incidents</TabsTrigger>
-            <TabsTrigger value="kyc">KYC Management</TabsTrigger>
-            <TabsTrigger value="patrols">Patrol Units</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3 sm:space-y-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 gap-1">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Home</span>
+            </TabsTrigger>
+            <TabsTrigger value="incidents" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Incidents</span>
+              <span className="sm:hidden">Cases</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
+            </TabsTrigger>
+            <TabsTrigger value="kyc" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">KYC Management</span>
+              <span className="sm:hidden">KYC</span>
+            </TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               {/* System Alerts */}
               <Card>
@@ -634,27 +644,31 @@ export default function AuthorityDashboard() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Zap className="w-5 h-5" />
-                    <span>Quick Actions</span>
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="text-sm sm:text-base">Quick Actions</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button className="h-20 flex-col space-y-2">
-                      <BarChart3 className="w-6 h-6" />
-                      <span>Generate Report</span>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <Button className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                      <BarChart3 className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <span className="hidden sm:inline">Generate Report</span>
+                      <span className="sm:hidden">Report</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col space-y-2">
-                      <Users className="w-6 h-6" />
-                      <span>Manage Users</span>
+                    <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                      <Users className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <span className="hidden sm:inline">Manage Users</span>
+                      <span className="sm:hidden">Users</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col space-y-2">
-                      <Settings className="w-6 h-6" />
-                      <span>System Config</span>
+                    <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                      <Settings className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <span className="hidden sm:inline">System Config</span>
+                      <span className="sm:hidden">Config</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col space-y-2">
-                      <Download className="w-6 h-6" />
-                      <span>Export Data</span>
+                    <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                      <Download className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <span className="hidden sm:inline">Export Data</span>
+                      <span className="sm:hidden">Export</span>
                     </Button>
                   </div>
                 </CardContent>
@@ -701,99 +715,100 @@ export default function AuthorityDashboard() {
           </TabsContent>
 
           <TabsContent value="incidents" className="space-y-4">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
               <div>
-                <h2 className="text-xl font-semibold">Incident Management</h2>
-                <p className="text-sm text-muted-foreground">
+                <h2 className="text-lg sm:text-xl font-semibold">Incident Management</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Monitor and manage all reported incidents
                 </p>
               </div>
-              <div className="flex space-x-2">
-                <Input placeholder="Search incidents..." className="w-64" />
-                <Button variant="outline">
-                  <Filter className="w-4 h-4" />
-                </Button>
-                <Button>
-                  <Download className="w-4 h-4 mr-2" />
-                  Export
-                </Button>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                <Input placeholder="Search incidents..." className="w-full sm:w-48 lg:w-64" />
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                    <Filter className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="ml-1 sm:hidden">Filter</span>
+                  </Button>
+                  <Button size="sm" className="flex-1 sm:flex-none">
+                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    Export
+                  </Button>
+                </div>
               </div>
             </div>
 
             <div className="grid gap-4">
               {incidents.map(incident => (
                 <Card key={incident.id} className="border-l-4 border-l-orange-500">
-                  <CardContent className="pt-6">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <h3 className="font-semibold text-lg">{incident.title}</h3>
-                          <Badge className={getStatusColor(incident.status)}>
-                            {incident.status.toUpperCase()}
-                          </Badge>
-                          <Badge className={getPriorityColor(incident.priority)}>
-                            {incident.priority.toUpperCase()}
-                          </Badge>
-                          <Badge className={getSeverityColor(incident.severity)}>
-                            {incident.severity.toUpperCase()}
-                          </Badge>
+                  <CardContent className="pt-4 sm:pt-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start space-y-3 sm:space-y-0">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-3">
+                          <h3 className="font-semibold text-base sm:text-lg truncate">{incident.title}</h3>
+                          <div className="flex flex-wrap gap-1 sm:gap-2">
+                            <Badge className={`${getStatusColor(incident.status)} text-xs px-2 py-1`}>
+                              {incident.status.toUpperCase()}
+                            </Badge>
+                            <Badge className={`${getPriorityColor(incident.priority)} text-xs px-2 py-1`}>
+                              {incident.priority.toUpperCase()}
+                            </Badge>
+                            <Badge className={`${getSeverityColor(incident.severity)} text-xs px-2 py-1`}>
+                              {incident.severity.toUpperCase()}
+                            </Badge>
+                          </div>
                         </div>
                         
-                        <p className="text-gray-700 dark:text-gray-300 mb-3">{incident.description}</p>
+                        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-3 line-clamp-2">{incident.description}</p>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center space-x-1">
-                            <MapPin className="w-4 h-4" />
-                            <span>{incident.location}</span>
+                            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                            <span className="truncate">{incident.location}</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{new Date(incident.reportedAt).toLocaleString()}</span>
+                            <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                            <span className="truncate">{new Date(incident.reportedAt).toLocaleDateString()}</span>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <Users className="w-4 h-4" />
-                            <span>Reported by: {incident.reportedBy}</span>
+                            <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                            <span className="truncate">By: {incident.reportedBy}</span>
                           </div>
                           {incident.affectedTourists && (
                             <div className="flex items-center space-x-1">
-                              <Globe className="w-4 h-4" />
-                              <span>{incident.affectedTourists} tourists affected</span>
+                              <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                              <span className="truncate">{incident.affectedTourists} tourists</span>
                             </div>
                           )}
                         </div>
 
                         {incident.assignedUnit && (
                           <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/30 rounded">
-                            <p className="text-sm">
-                              <strong>Assigned Unit:</strong> {incident.assignedUnit}
+                            <p className="text-xs sm:text-sm">
+                              <strong>Assigned:</strong> {incident.assignedUnit}
                             </p>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex flex-col space-y-2 ml-4">
+                      <div className="flex flex-row sm:flex-col space-x-2 sm:space-x-0 sm:space-y-2 sm:ml-4 w-full sm:w-auto">
                         <Button
                           size="sm"
+                          className="flex-1 sm:flex-none text-xs sm:text-sm"
                           onClick={() => handleIncidentAction(incident.id, 'investigating')}
                         >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Investigate
+                          <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden sm:inline">Investigate</span>
+                          <span className="sm:hidden">View</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
+                          className="flex-1 sm:flex-none text-xs sm:text-sm"
                           onClick={() => handleIncidentAction(incident.id, 'resolved')}
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Resolve
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <FileText className="w-4 h-4 mr-1" />
-                          View Details
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Download className="w-4 h-4 mr-1" />
-                          Export Report
+                          <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                          <span className="hidden sm:inline">Resolve</span>
+                          <span className="sm:hidden">Done</span>
                         </Button>
                       </div>
                     </div>
@@ -925,7 +940,7 @@ export default function AuthorityDashboard() {
               </Button>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
               {patrolUnits.map(unit => (
                 <Card key={unit.id}>
                   <CardContent className="pt-6">
@@ -982,35 +997,113 @@ export default function AuthorityDashboard() {
                   <CardTitle className="flex items-center space-x-2">
                     <BarChart3 className="w-5 h-5" />
                     <span>Incident Trends</span>
+                    {incidentTrendsLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                    <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Incident trend chart would be displayed here</p>
+                  {incidentTrendsError ? (
+                    <div className="flex items-center justify-center h-[250px] text-red-500">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Failed to load data
                     </div>
-                  </div>
+                  ) : (
+                    <BarChartComponent 
+                      data={incidentTrendData}
+                      height={250}
+                    />
+                  )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <PieChart className="w-5 h-5" />
-                    <span>Incident Types</span>
+                    <LineChart className="w-5 h-5" />
+                    <span>Response Time Trends</span>
+                    {responseTimeLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-64 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                    <div className="text-center">
-                      <PieChart className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Incident type distribution would be displayed here</p>
+                  {responseTimeError ? (
+                    <div className="flex items-center justify-center h-[250px] text-red-500">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Failed to load data
                     </div>
-                  </div>
+                  ) : (
+                    <LineChartComponent 
+                      data={responseTimeData}
+                      dataKey="time"
+                      height={250}
+                      strokeColor="#10B981"
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Incident Types</span>
+                    {incidentTypesLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {incidentTypesError ? (
+                    <div className="flex items-center justify-center h-[250px] text-red-500">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Failed to load data
+                    </div>
+                  ) : (
+                    <BarChartComponent 
+                      data={incidentTypeData}
+                      height={250}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <LineChart className="w-5 h-5" />
+                    <span>Resolution Rate</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LineChartComponent 
+                    data={incidentTrendData.map(item => ({ 
+                      name: item.name, 
+                      value: Math.round((item.resolved / item.incidents) * 100) 
+                    }))}
+                    dataKey="value"
+                    height={250}
+                    strokeColor="#3B82F6"
+                  />
                 </CardContent>
               </Card>
             </div>
+
+            {/* India Map */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Map className="w-5 h-5" />
+                  <span>India Safety Overview</span>
+                </CardTitle>
+                <CardDescription>
+                  Interactive map showing safety scores and incident data by state
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <IndiaMapComponent 
+                  onStateClick={(state) => {
+                    console.log('Clicked state:', state);
+                    // Handle state click - could show detailed stats or navigate to state-specific view
+                  }}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="system" className="space-y-4">

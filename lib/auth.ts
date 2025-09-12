@@ -57,10 +57,10 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Always redirect to dashboard router after login
-      if (url.startsWith('/')) return `${baseUrl}/dashboard`;
+      // Redirect to home after login; client can navigate to dashboard
+      if (url.startsWith('/')) return `${baseUrl}/`;
       else if (new URL(url).origin === baseUrl) return url;
-      return `${baseUrl}/dashboard`;
+      return `${baseUrl}/`;
     },
     async jwt({ token, user }) {
       if (user) {

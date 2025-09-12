@@ -129,22 +129,40 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    /* Smooth scrolling for better UX */
+    scroll-behavior: smooth;
+    /* Improve mobile viewport handling */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    /* Fix scrolling glitches on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+  
   body {
     @apply bg-background text-foreground;
     /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
-  }
-  
-  /* Improve mobile viewport handling */
-  html {
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
+    /* Improve scrolling performance */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* Reduce paint operations during scroll */
+    will-change: scroll-position;
   }
   
   /* Better mobile touch handling */
   button, [role="button"] {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+  }
+  
+  /* Fix potential scrolling glitches with transforms */
+  .scroll-container {
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 }
 
@@ -254,5 +272,27 @@
       padding-top: 0.5rem;
       padding-bottom: 0.5rem;
     }
+  }
+  
+  /* Smooth scrolling utilities */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Performance optimizations for scrolling */
+  .scroll-optimized {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
+  }
+  
+  /* Fix for potential glitches during animations */
+  .no-flicker {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 }

@@ -2,22 +2,36 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Users, MapPin, AlertTriangle, Phone, Star, Search, Lock, ArrowRight, Play, Zap, Database, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import UserDropdown from '@/components/UserDropdown';
 
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    // If user is logged in, redirect to dashboard
-    if (session) {
-      router.push('/dashboard');
+  // Remove auto-redirect to dashboard; stay on home with guidance
+
+  const callNumber = useCallback((num: string) => {
+    if (typeof window !== 'undefined') {
+      window.location.href = `tel:${num}`;
     }
-  }, [session, router]);
+  }, []);
+
+  const triggerPanic = useCallback(async () => {
+    try {
+      const res = await fetch('/api/emergency', { method: 'POST' });
+      if (!res.ok) {
+        console.error('Panic API failed');
+      }
+      router.push('/dashboard');
+    } catch (e) {
+      console.error('Panic error', e);
+    }
+  }, [router]);
 
   if (status === 'loading') {
     return (
@@ -38,21 +52,35 @@ export default function Home() {
               <h1 className="text-lg sm:text-2xl font-bold text-foreground">Yatri Rakshak</h1>
             </div>
             <nav className="hidden lg:flex space-x-8">
-              <Link href="/" className="text-foreground/80 hover:text-foreground transition-colors">Home</Link>
-              <Link href="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">Dashboard</Link>
-              <Link href="/kyc" className="text-foreground/80 hover:text-foreground transition-colors">KYC</Link>
-              <Link href="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">Features</Link>
-              <Link href="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">Pricing</Link>
-              <Link href="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">FAQ</Link>
-              <div className="flex items-center space-x-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <span className="text-foreground/80">Protection</span>
-              </div>
+              <Link href="/" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
+                Home
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link href="/dashboard" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
+                Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link href="/kyc" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
+                KYC
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <a href="#how-to" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
+                How to use
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
+              <a href="#emergency" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
+                Emergency
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </a>
             </nav>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Link href="/auth/signup">
-                <Button className="defi-button text-xs sm:text-sm px-3 sm:px-4 py-2">Create Account</Button>
-              </Link>
+              {session ? (
+                <UserDropdown />
+              ) : (
+                <Link href="/auth/signup">
+                  <Button className="defi-button text-xs sm:text-sm px-3 sm:px-4 py-2">Create Account</Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -109,11 +137,11 @@ export default function Home() {
                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                   </Button>
                 </Link>
-                <Link href="/auth/signup">
+                <a href="#how-to">
                   <Button variant="outline" size="sm" className="border-primary/30 bg-transparent text-foreground hover:bg-primary/10 px-4 sm:px-6 lg:px-8 py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-lg w-full xs:w-auto">
-                    Discover More
+                    How to use
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
             
@@ -127,28 +155,6 @@ export default function Home() {
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-primary rounded-full flex items-center justify-center defi-glow">
                       <Shield className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-primary-foreground" />
                     </div>
-                    
-                    {/* Data Points */}
-                    <div className="absolute top-2 left-2 sm:top-4 sm:left-4 lg:top-8 lg:left-8 defi-card p-2 sm:p-3 lg:p-4 rounded-lg">
-                      <div className="text-xs sm:text-sm text-foreground/60">Cortex</div>
-                      <div className="text-sm sm:text-lg lg:text-2xl font-bold text-foreground">20.945</div>
-                    </div>
-                    
-                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 lg:top-8 lg:right-8 defi-card p-2 sm:p-3 lg:p-4 rounded-lg">
-                      <div className="text-xs sm:text-sm text-foreground/60">Aelf</div>
-                      <div className="text-sm sm:text-lg lg:text-2xl font-bold text-foreground">19.346</div>
-                    </div>
-                    
-                    <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 lg:bottom-8 lg:left-8 defi-card p-2 sm:p-3 lg:p-4 rounded-lg">
-                      <div className="text-xs sm:text-sm text-foreground/60">Quant</div>
-                      <div className="text-sm sm:text-lg lg:text-2xl font-bold text-foreground">2.945</div>
-                    </div>
-                    
-                    <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 lg:bottom-8 lg:right-8 defi-card p-2 sm:p-3 lg:p-4 rounded-lg">
-                      <div className="text-xs sm:text-sm text-foreground/60">Meeton</div>
-                      <div className="text-sm sm:text-lg lg:text-2xl font-bold text-foreground">440</div>
-                    </div>
-                    
                     {/* Connection Lines */}
                     <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 400">
                       <defs>
@@ -158,235 +164,65 @@ export default function Home() {
                         </linearGradient>
                       </defs>
                       <line x1="200" y1="200" x2="100" y2="100" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" />
-                      <line x1="200" y1="200" x2="300" y2="100" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" style={{animationDelay: '0.5s'}} />
-                      <line x1="200" y1="200" x2="100" y2="300" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" style={{animationDelay: '1s'}} />
-                      <line x1="200" y1="200" x2="300" y2="300" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" style={{animationDelay: '1.5s'}} />
+                      <line x1="200" y1="200" x2="300" y2="100" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" />
+                      <line x1="200" y1="200" x2="100" y2="300" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" />
+                      <line x1="200" y1="200" x2="300" y2="300" stroke="url(#lineGradient)" strokeWidth="2" className="animate-pulse" />
                     </svg>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
-          {/* Bottom Section */}
-          <div className="flex justify-between items-center mt-8 sm:mt-12 lg:mt-16 pt-4 sm:pt-6 lg:pt-8 border-t border-border/30">
-            <div className="text-xs sm:text-sm text-foreground/60">02/03. Scroll down</div>
-            <div className="flex space-x-1">
-              <div className="w-1 h-4 sm:h-6 lg:h-8 bg-primary/60 rounded-full"></div>
-              <div className="w-1 h-4 sm:h-6 lg:h-8 bg-primary/40 rounded-full"></div>
-              <div className="w-1 h-4 sm:h-6 lg:h-8 bg-primary/20 rounded-full"></div>
-            </div>
-            <div className="text-xs sm:text-sm text-foreground/60">Safety horizons</div>
-          </div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-8 sm:py-12 lg:py-20 relative">
-        <div className="absolute inset-0 defi-bg-pattern opacity-50"></div>
-        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-4">
-              Comprehensive Safety Features
-            </h3>
-            <p className="text-sm sm:text-base lg:text-lg text-foreground/70 px-4 sm:px-0">
-              Everything you need for a safe and secure experience
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-400" />
-                </div>
-                <CardTitle className="text-foreground text-base sm:text-lg">Emergency Reporting</CardTitle>
-                <CardDescription className="text-foreground/70 text-sm">
-                  Quick incident reporting with real-time location sharing
-                </CardDescription>
+          {/* How to use */}
+          <div id="how-to" className="mt-10 sm:mt-14 lg:mt-16">
+            <Card className="defi-card">
+              <CardHeader>
+                <CardTitle className="text-foreground">How to use</CardTitle>
+                <CardDescription className="text-foreground/70">Quick start guide</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-foreground/60">
-                  Report emergencies instantly with GPS coordinates, photos, and priority levels.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
+              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">1. Create account</h4>
+                  <p className="text-sm text-foreground/70">Sign up and complete KYC for best experience.</p>
                 </div>
-                <CardTitle className="text-foreground text-base sm:text-lg">Real-time Tracking</CardTitle>
-                <CardDescription className="text-foreground/70 text-sm">
-                  Live location monitoring and geo-fence alerts
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-foreground/60">
-                  Stay connected with real-time location sharing and safety zone monitoring.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">2. Explore dashboard</h4>
+                  <p className="text-sm text-foreground/70">Open the app to access role-based tools.</p>
                 </div>
-                <CardTitle className="text-foreground text-base sm:text-lg">Multi-Role Platform</CardTitle>
-                <CardDescription className="text-foreground/70 text-sm">
-                  Designed for tourists, citizens, police, and authorities
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-foreground/60">
-                  Role-based dashboards with specialized tools for each user type.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
+                <div>
+                  <h4 className="font-medium text-foreground mb-1">3. Use panic button</h4>
+                  <p className="text-sm text-foreground/70">Tap Panic to alert authorities with your info.</p>
                 </div>
-                <CardTitle className="text-foreground text-base sm:text-lg">Emergency Contacts</CardTitle>
-                <CardDescription className="text-foreground/70 text-sm">
-                  Quick access to local emergency services
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-foreground/60">
-                  One-tap access to police, medical, and tourist helpline numbers.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                </div>
-                <CardTitle className="text-foreground text-base sm:text-lg">KYC Verification</CardTitle>
-                <CardDescription className="text-foreground/70 text-sm">
-                  Secure identity verification for all users
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-foreground/60">
-                  Comprehensive KYC process ensuring platform security and trust.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Star className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400" />
-                </div>
-                <CardTitle className="text-foreground text-base sm:text-lg">24/7 Support</CardTitle>
-                <CardDescription className="text-foreground/70 text-sm">
-                  Round-the-clock assistance and monitoring
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm text-foreground/60">
-                  Continuous support with dedicated response teams and monitoring.
-                </p>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Demo Users Section */}
-      <section className="py-8 sm:py-12 lg:py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+      {/* Emergency quick actions */}
+      <section id="emergency" className="py-10 sm:py-14 lg:py-20 relative">
         <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2 sm:mb-4">
-              Try Demo Accounts
-            </h3>
-            <p className="text-sm sm:text-base lg:text-lg text-foreground/70 px-4 sm:px-0">
-              Test the platform with pre-configured demo accounts
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
-                </div>
-                <CardTitle className="text-base sm:text-lg text-foreground">Tourist Demo</CardTitle>
-                <CardDescription className="text-foreground/70 text-xs sm:text-sm">Experience the tourist interface</CardDescription>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="defi-card hover:defi-glow transition-all">
+              <CardHeader>
+                <CardTitle className="text-foreground">Panic Button</CardTitle>
+                <CardDescription className="text-foreground/70">Instant help request</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm mb-1 sm:mb-2 text-foreground/80"><strong>Email:</strong> tourist@demo.com</p>
-                <p className="text-xs sm:text-sm mb-3 sm:mb-4 text-foreground/80"><strong>Password:</strong> demo123</p>
-                <Link href="/auth/signin">
-                  <Button variant="outline" size="sm" className="w-full border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs sm:text-sm py-2">
-                    Try Demo
-                  </Button>
-                </Link>
+              <CardContent>
+                <Button onClick={triggerPanic} className="defi-button w-full py-6 text-lg">Send Panic Alert</Button>
               </CardContent>
             </Card>
 
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-red-400" />
-                </div>
-                <CardTitle className="text-base sm:text-lg text-foreground">Police Demo</CardTitle>
-                <CardDescription className="text-foreground/70 text-xs sm:text-sm">Test police officer features</CardDescription>
+            <Card className="defi-card">
+              <CardHeader>
+                <CardTitle className="text-foreground">Emergency Numbers</CardTitle>
+                <CardDescription className="text-foreground/70">Tap to call</CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm mb-1 sm:mb-2 text-foreground/80"><strong>Email:</strong> police@demo.com</p>
-                <p className="text-xs sm:text-sm mb-3 sm:mb-4 text-foreground/80"><strong>Password:</strong> demo123</p>
-                <Link href="/auth/signin">
-                  <Button variant="outline" size="sm" className="w-full border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs sm:text-sm py-2">
-                    Try Demo
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Star className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-                </div>
-                <CardTitle className="text-base sm:text-lg text-foreground">Authority Demo</CardTitle>
-                <CardDescription className="text-foreground/70 text-xs sm:text-sm">Explore authority dashboard</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm mb-1 sm:mb-2 text-foreground/80"><strong>Email:</strong> authority@demo.com</p>
-                <p className="text-xs sm:text-sm mb-3 sm:mb-4 text-foreground/80"><strong>Password:</strong> demo123</p>
-                <Link href="/auth/signin">
-                  <Button variant="outline" size="sm" className="w-full border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs sm:text-sm py-2">
-                    Try Demo
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="defi-card hover:defi-glow transition-all duration-300">
-              <CardHeader className="pb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                </div>
-                <CardTitle className="text-base sm:text-lg text-foreground">Admin Demo</CardTitle>
-                <CardDescription className="text-foreground/70 text-xs sm:text-sm">Access admin controls</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs sm:text-sm mb-1 sm:mb-2 text-foreground/80"><strong>Email:</strong> admin@demo.com</p>
-                <p className="text-xs sm:text-sm mb-3 sm:mb-4 text-foreground/80"><strong>Password:</strong> demo123</p>
-                <Link href="/auth/signin">
-                  <Button variant="outline" size="sm" className="w-full border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 text-xs sm:text-sm py-2">
-                    Try Demo
-                  </Button>
-                </Link>
+              <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <Button variant="outline" onClick={() => callNumber('100')}><Phone className="w-4 h-4 mr-2" />Police 100</Button>
+                <Button variant="outline" onClick={() => callNumber('108')}><Phone className="w-4 h-4 mr-2" />Medical 108</Button>
+                <Button variant="outline" onClick={() => callNumber('1363')}><Phone className="w-4 h-4 mr-2" />Tourist 1363</Button>
               </CardContent>
             </Card>
           </div>
@@ -406,25 +242,25 @@ export default function Home() {
                 Ensuring safety and security for all travelers and citizens.
               </p>
             </div>
-            
+
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Quick Links</h4>
               <ul className="space-y-1 sm:space-y-2 text-foreground/70">
                 <li><Link href="/auth/signin" className="hover:text-foreground transition-colors text-sm sm:text-base">Sign In</Link></li>
                 <li><Link href="/auth/signup" className="hover:text-foreground transition-colors text-sm sm:text-base">Sign Up</Link></li>
-                <li><a href="#features" className="hover:text-foreground transition-colors text-sm sm:text-base">Features</a></li>
+                <li><a href="#how-to" className="hover:text-foreground transition-colors text-sm sm:text-base">How to use</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Support</h4>
               <ul className="space-y-1 sm:space-y-2 text-foreground/70">
                 <li><a href="#" className="hover:text-foreground transition-colors text-sm sm:text-base">Help Center</a></li>
                 <li><a href="#" className="hover:text-foreground transition-colors text-sm sm:text-base">Contact Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors text-sm sm:text-base">Emergency</a></li>
+                <li><a href="#emergency" className="hover:text-foreground transition-colors text-sm sm:text-base">Emergency</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-foreground">Emergency</h4>
               <ul className="space-y-1 sm:space-y-2 text-foreground/70">
@@ -434,7 +270,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-border/30 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-foreground/60">
             <p className="text-xs sm:text-sm">&copy; 2025 Yatri Rakshak. All rights reserved.</p>
           </div>

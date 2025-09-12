@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, easeInOut } from 'framer-motion';
 import { Menu, X, ArrowRight, Zap, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import UserDropdown from '@/components/UserDropdown';
 
 interface NavItem {
   name: string;
@@ -18,6 +20,7 @@ const navItems: NavItem[] = [
 ];
 
 export default function Header2() {
+  const { data: session } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -154,23 +157,29 @@ export default function Header2() {
                 <Search className="h-5 w-5" />
               </motion.button>
 
-              <Link prefetch={false}                href="/login"
-                className="text-foreground/80 hover:text-foreground px-4 py-2 text-sm font-medium transition-colors duration-200"
-              >
-                Sign In
-              </Link>
+              {session ? (
+                <UserDropdown />
+              ) : (
+                <>
+                  <Link prefetch={false} href="/auth/signin"
+                    className="text-foreground/80 hover:text-foreground px-4 py-2 text-sm font-medium transition-colors duration-200"
+                  >
+                    Sign In
+                  </Link>
 
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Link prefetch={false}                  href="/dashboard"
-                  className="bg-foreground text-background hover:bg-foreground/90 inline-flex items-center space-x-2 rounded-lg px-5 py-2.5 text-sm font-medium shadow-sm transition-all duration-200"
-                >
-                  <span>Dashboard</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link prefetch={false} href="/auth/signup"
+                      className="bg-foreground text-background hover:bg-foreground/90 inline-flex items-center space-x-2 rounded-lg px-5 py-2.5 text-sm font-medium shadow-sm transition-all duration-200"
+                    >
+                      <span>Get Started</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </motion.div>
+                </>
+              )}
             </motion.div>
 
             <motion.button
@@ -224,18 +233,26 @@ export default function Header2() {
                   className="border-border space-y-3 border-t pt-6"
                   variants={mobileItemVariants}
                 >
-                  <Link prefetch={false}                    href="/login"
-                    className="text-foreground hover:bg-muted block w-full rounded-lg py-3 text-center font-medium transition-colors duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link prefetch={false}                    href="/dashboard"
-                    className="bg-foreground text-background hover:bg-foreground/90 block w-full rounded-lg py-3 text-center font-medium transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                   Dashboard
-                  </Link>
+                  {session ? (
+                    <div className="px-4">
+                      <UserDropdown />
+                    </div>
+                  ) : (
+                    <>
+                      <Link prefetch={false} href="/auth/signin"
+                        className="text-foreground hover:bg-muted block w-full rounded-lg py-3 text-center font-medium transition-colors duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Sign In
+                      </Link>
+                      <Link prefetch={false} href="/auth/signup"
+                        className="bg-foreground text-background hover:bg-foreground/90 block w-full rounded-lg py-3 text-center font-medium transition-all duration-200"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Get Started
+                      </Link>
+                    </>
+                  )}
                 </motion.div>
               </div>
             </motion.div>

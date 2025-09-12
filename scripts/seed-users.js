@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/yatrirakshak';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/yatri-rakshak';
 
 const demoUsers = [
   {

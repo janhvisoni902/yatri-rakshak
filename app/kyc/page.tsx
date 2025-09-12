@@ -58,6 +58,24 @@ export default function KYCPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    frontSide: File | null;
+    backSide: File | null;
+    additionalDocs: File[];
+  }>({
+    frontSide: null,
+    backSide: null,
+    additionalDocs: []
+  });
+  const [uploadErrors, setUploadErrors] = useState<{
+    frontSide: string;
+    backSide: string;
+    additionalDocs: string;
+  }>({
+    frontSide: '',
+    backSide: '',
+    additionalDocs: ''
+  });
   const [formData, setFormData] = useState<KYCFormData>({
     fullName: '',
     dateOfBirth: '',
@@ -111,6 +129,71 @@ export default function KYCPage() {
         [field]: value
       }
     }));
+  };
+
+  const validateFile = (file: File, type: 'image' | 'document'): string => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    
+    if (file.size > maxSize) {
+      return 'File size must be less than 10MB';
+    }
+    
+    if (type === 'image') {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        return 'Only JPG, JPEG, and PNG files are allowed for images';
+      }
+    } else if (type === 'document') {
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        return 'Only PDF, JPG, JPEG, and PNG files are allowed';
+      }
+    }
+    
+    return '';
+  };
+
+  const handleFileUpload = (file: File, uploadType: 'frontSide' | 'backSide' | 'additionalDocs') => {
+    const error = validateFile(file, uploadType === 'additionalDocs' ? 'document' : 'image');
+    
+    if (error) {
+      setUploadErrors(prev => ({
+        ...prev,
+        [uploadType]: error
+      }));
+      return;
+    }
+
+    setUploadErrors(prev => ({
+      ...prev,
+      [uploadType]: ''
+    }));
+
+    if (uploadType === 'additionalDocs') {
+      setUploadedFiles(prev => ({
+        ...prev,
+        additionalDocs: [...prev.additionalDocs, file]
+      }));
+    } else {
+      setUploadedFiles(prev => ({
+        ...prev,
+        [uploadType]: file
+      }));
+    }
+  };
+
+  const removeFile = (uploadType: 'frontSide' | 'backSide' | 'additionalDocs', index?: number) => {
+    if (uploadType === 'additionalDocs' && typeof index === 'number') {
+      setUploadedFiles(prev => ({
+        ...prev,
+        additionalDocs: prev.additionalDocs.filter((_, i) => i !== index)
+      }));
+    } else {
+      setUploadedFiles(prev => ({
+        ...prev,
+        [uploadType]: null
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -368,21 +451,167 @@ export default function KYCPage() {
               <div className="space-y-4">
                 <Label>Document Upload</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Front Side Upload */}
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-sm text-gray-600 mb-2">Upload Front Side</p>
-                    <Button variant="outline" size="sm">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Choose File
-                    </Button>
+                    {uploadedFiles.frontSide ? (
+                      <div className="space-y-2">
+                        <FileText className="w-12 h-12 text-green-500 mx-auto" />
+                        <p className="text-sm text-green-600 font-medium">
+                          {uploadedFiles.frontSide.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {(uploadedFiles.frontSide.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => removeFile('frontSide')}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-sm text-gray-600 mb-2">Upload Front Side</p>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file, 'frontSide');
+                          }}
+                          className="hidden"
+                          id="frontSideUpload"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => document.getElementById('frontSideUpload')?.click()}
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Choose File
+                        </Button>
+                      </>
+                    )}
+                    {uploadErrors.frontSide && (
+                      <p className="text-xs text-red-600 mt-2">{uploadErrors.frontSide}</p>
+                    )}
                   </div>
+
+                  {/* Back Side Upload */}
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-sm text-gray-600 mb-2">Upload Back Side</p>
-                    <Button variant="outline" size="sm">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Choose File
-                    </Button>
+                    {uploadedFiles.backSide ? (
+                      <div className="space-y-2">
+                        <FileText className="w-12 h-12 text-green-500 mx-auto" />
+                        <p className="text-sm text-green-600 font-medium">
+                          {uploadedFiles.backSide.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {(uploadedFiles.backSide.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => removeFile('backSide')}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-sm text-gray-600 mb-2">Upload Back Side</p>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file, 'backSide');
+                          }}
+                          className="hidden"
+                          id="backSideUpload"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => document.getElementById('backSideUpload')?.click()}
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Choose File
+                        </Button>
+                      </>
+                    )}
+                    {uploadErrors.backSide && (
+                      <p className="text-xs text-red-600 mt-2">{uploadErrors.backSide}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Additional Documents Upload */}
+                <div className="space-y-4">
+                  <Label>Additional Documents (Optional)</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                    <div className="text-center mb-4">
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-sm text-gray-600 mb-2">Upload Additional Documents</p>
+                      <p className="text-xs text-gray-500 mb-4">
+                        Support documents, certificates, or other relevant files (PDF, JPG, PNG)
+                      </p>
+                      <input
+                        type="file"
+                        accept="application/pdf,image/jpeg,image/jpg,image/png"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach(file => handleFileUpload(file, 'additionalDocs'));
+                        }}
+                        className="hidden"
+                        id="additionalDocsUpload"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => document.getElementById('additionalDocsUpload')?.click()}
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        Choose Files
+                      </Button>
+                    </div>
+
+                    {/* Display uploaded additional documents */}
+                    {uploadedFiles.additionalDocs.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Uploaded Files:</Label>
+                        {uploadedFiles.additionalDocs.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <FileText className="w-5 h-5 text-blue-500" />
+                              <div>
+                                <p className="text-sm font-medium">{file.name}</p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.size / 1024 / 1024).toFixed(2)} MB • {file.type.includes('pdf') ? 'PDF' : 'Image'}
+                                </p>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => removeFile('additionalDocs', index)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {uploadErrors.additionalDocs && (
+                      <p className="text-xs text-red-600 mt-2">{uploadErrors.additionalDocs}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -394,9 +623,11 @@ export default function KYCPage() {
                     <h4 className="font-medium text-blue-800">Document Guidelines</h4>
                     <ul className="text-sm text-blue-700 mt-1 space-y-1">
                       <li>• Ensure documents are clear and readable</li>
-                      <li>• Upload high-quality images (JPG, PNG)</li>
+                      <li>• Upload high-quality images (JPG, PNG) or PDF files</li>
                       <li>• All corners of the document should be visible</li>
-                      <li>• Maximum file size: 5MB per image</li>
+                      <li>• Maximum file size: 10MB per file</li>
+                      <li>• PDF files are supported for additional documents</li>
+                      <li>• Multiple files can be uploaded for additional documents</li>
                     </ul>
                   </div>
                 </div>

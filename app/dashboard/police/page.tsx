@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useIncidentTrends, useResponseTimeData, useIncidentTypeData } from '@/hooks/useAnalytics';
 import { Button } from '@/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card';
 import { Input } from '@/components/input';
@@ -31,8 +32,15 @@ import {
   UserCheck,
   Zap,
   Heart,
-  Battery
+  Battery,
+  BarChart3,
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react';
+import BarChartComponent from '@/components/charts/BarChart';
+import LineChartComponent from '@/components/charts/LineChart';
+import IndiaMapComponent from '@/components/charts/IndiaMap';
+import UserDropdown from '@/components/UserDropdown';
 
 interface PoliceStats {
   activePatrols: number;
@@ -151,6 +159,11 @@ export default function PoliceDashboard() {
     }
   ]);
 
+  // Dynamic analytics data
+  const { data: incidentTrendData, loading: incidentTrendsLoading, error: incidentTrendsError } = useIncidentTrends();
+  const { data: responseTimeData, loading: responseTimeLoading, error: responseTimeError } = useResponseTimeData();
+  const { data: incidentTypeData, loading: incidentTypesLoading, error: incidentTypesError } = useIncidentTypeData();
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -221,25 +234,22 @@ export default function PoliceDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-40">
-        <div className="container mx-auto px-2 xs:px-4 py-2 xs:py-4">
-          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
-            <div className="w-full xs:w-auto">
-              <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-foreground flex items-center space-x-2">
-                <Shield className="w-5 h-5 xs:w-6 xs:h-6 text-blue-500" />
-                <span>Yatri Rakshak</span>
-              </h1>
-              <div className="flex flex-wrap items-center gap-1 xs:gap-2 mt-1">
-                <Badge className="bg-blue-100 text-blue-800 text-xs">Police Officer</Badge>
-                {session.user.badgeNumber && (
-                  <Badge variant="outline" className="text-xs hidden xs:inline-flex">Badge: {session.user.badgeNumber}</Badge>
-                )}
-                <Badge variant="outline" className="text-xs hidden sm:inline-flex">{session.user.department}</Badge>
+    <div className="min-h-screen bg-background scroll-optimized no-flicker">
+      <header className="bg-card border-b border-border">
+        <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Shield className="w-8 h-8 text-primary" />
+              <div>
+                <h1 className="text-2xl font-bold">Police Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Officer ID: {session?.user?.id || 'P001'}</p>
               </div>
             </div>
-            <div className="flex items-center space-x-1 xs:space-x-2 sm:space-x-4 w-full xs:w-auto justify-between xs:justify-end">
+            <div className="flex items-center space-x-4">
+              <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                On Duty
+              </Badge>
+              <UserDropdown />
               <Button variant="destructive" size="sm" className="text-xs xs:text-sm px-2 xs:px-3">
                 <Siren className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
                 <span className="hidden xs:inline">Emergency</span>
@@ -263,8 +273,8 @@ export default function PoliceDashboard() {
       </header>
 
       <div className="container mx-auto px-2 xs:px-4 py-3 xs:py-6">
-        {/* Statistics Cards */}
-        <div className="grid gap-2 xs:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 xs:mb-6">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
           <Card>
             <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
@@ -313,6 +323,18 @@ export default function PoliceDashboard() {
             </CardContent>
           </Card>
 
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 sm:pt-4 lg:pt-6 pb-3 sm:pb-4 lg:pb-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-foreground/70 truncate">Active Cases</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-400">{stats.emergencyCalls}</p>
+                </div>
+                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-red-400 flex-shrink-0" />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -321,6 +343,18 @@ export default function PoliceDashboard() {
                   <p className="text-2xl font-bold text-purple-600">{stats.responseTime}m</p>
                 </div>
                 <Zap className="w-6 h-6 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="defi-card hover:defi-glow transition-all duration-300">
+            <CardContent className="pt-3 sm:pt-4 lg:pt-6 pb-3 sm:pb-4 lg:pb-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-foreground/70 truncate">Units on Patrol</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400">{stats.activePatrols}</p>
+                </div>
+                <Car className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-yellow-400 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
@@ -340,9 +374,10 @@ export default function PoliceDashboard() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 xs:space-y-4">
-          <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
             <TabsTrigger value="incidents" className="text-xs xs:text-sm py-2 xs:py-2.5">Incidents</TabsTrigger>
             <TabsTrigger value="patrols" className="text-xs xs:text-sm py-2 xs:py-2.5">Patrols</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs xs:text-sm py-2 xs:py-2.5">Analytics</TabsTrigger>
             <TabsTrigger value="reports" className="text-xs xs:text-sm py-2 xs:py-2.5">Reports</TabsTrigger>
             <TabsTrigger value="tools" className="text-xs xs:text-sm py-2 xs:py-2.5">Tools</TabsTrigger>
           </TabsList>
@@ -542,6 +577,94 @@ export default function PoliceDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Weekly Incident Trends */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Weekly Incident Trends</span>
+                    {incidentTrendsLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {incidentTrendsError ? (
+                    <div className="flex items-center justify-center h-[300px] text-red-500">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Failed to load data
+                    </div>
+                  ) : (
+                    <BarChartComponent 
+                      data={incidentTrendData}
+                      height={300}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Response Time Improvement */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <TrendingUp className="w-5 h-5" />
+                    <span>Response Time Improvement</span>
+                    {responseTimeLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {responseTimeError ? (
+                    <div className="flex items-center justify-center h-[300px] text-red-500">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Failed to load data
+                    </div>
+                  ) : (
+                    <LineChartComponent 
+                      data={responseTimeData}
+                      dataKey="value"
+                      strokeColor="#10B981"
+                      height={300}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Incident Types Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Incident Types Distribution</span>
+                    {incidentTypesLoading && <RefreshCw className="w-4 h-4 animate-spin" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {incidentTypesError ? (
+                    <div className="flex items-center justify-center h-[300px] text-red-500">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      Failed to load data
+                    </div>
+                  ) : (
+                    <BarChartComponent 
+                      data={incidentTypeData}
+                      height={300}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Area Safety Map */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Area Safety Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <IndiaMapComponent />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">

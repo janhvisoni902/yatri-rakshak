@@ -2,7 +2,8 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useVisitTrends, useSafetyTrends, usePlaceTypeData } from '@/hooks/useAnalytics';
 import { Button } from '@/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/card';
 import { Input } from '@/components/input';
@@ -54,8 +55,14 @@ import {
   Image,
   FileText,
   ExternalLink,
-  Activity
+  Activity,
+  BarChart3,
+  TrendingUp,
+  RefreshCw
 } from 'lucide-react';
+import BarChartComponent from '@/components/charts/BarChart';
+import LineChartComponent from '@/components/charts/LineChart';
+import IndiaMapComponent from '@/components/charts/IndiaMap';
 import ProfileEditModal from '@/components/profile-edit-modal';
 
 interface TouristStats {
@@ -324,6 +331,11 @@ export default function TouristDashboard() {
     const newScore = calculateSafetyScore();
     setStats(prev => ({ ...prev, safetyScore: newScore }));
   }, [calculateSafetyScore]);
+
+  // Dynamic analytics data
+  const { data: visitTrendData, loading: visitTrendsLoading, error: visitTrendsError } = useVisitTrends();
+  const { data: safetyScoreData, loading: safetyTrendsLoading, error: safetyTrendsError } = useSafetyTrends();
+  const { data: placeTypeData, loading: placeTypesLoading, error: placeTypesError } = usePlaceTypeData();
 
   const getSafetyColor = (level: string) => {
     switch (level) {
@@ -777,7 +789,7 @@ export default function TouristDashboard() {
 
       <div className="container mx-auto px-2 xs:px-4 py-3 xs:py-6">
         {/* Statistics Cards */}
-        <div className="grid gap-2 xs:gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-4 xs:mb-6">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-4 xs:mb-6">
           <Card className="defi-card hover:defi-glow transition-all duration-300">
             <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
               <div className="flex items-center justify-between">
@@ -789,79 +801,38 @@ export default function TouristDashboard() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Places</p>
-                  <p className="text-lg xs:text-2xl font-bold text-blue-400">{stats.placesVisited}</p>
-                </div>
-                <MapPin className="w-4 h-4 xs:w-6 xs:h-6 text-blue-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Photos</p>
-                  <p className="text-lg xs:text-2xl font-bold text-purple-400">{stats.photosShared}</p>
-                </div>
-                <PhotoIcon className="w-4 h-4 xs:w-6 xs:h-6 text-purple-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Contacts</p>
-                  <p className="text-lg xs:text-2xl font-bold text-orange-400">{stats.emergencyContacts}</p>
-                </div>
-                <Users className="w-4 h-4 xs:w-6 xs:h-6 text-orange-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="defi-card hover:defi-glow transition-all duration-300">
-            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Days Left</p>
-                  <p className="text-lg xs:text-2xl font-bold text-red-400">{stats.daysRemaining}</p>
-                </div>
-                <Calendar className="w-4 h-4 xs:w-6 xs:h-6 text-red-400" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="defi-card hover:defi-glow transition-all duration-300 col-span-2 sm:col-span-1">
-            <CardContent className="pt-3 xs:pt-6 pb-3 xs:pb-6">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs xs:text-sm font-medium text-foreground/70">Location</p>
-                  <p className="text-xs xs:text-sm font-bold text-foreground/80 truncate">{stats.currentLocation}</p>
-                </div>
-                <Compass className="w-4 h-4 xs:w-6 xs:h-6 text-foreground/60 flex-shrink-0" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 xs:space-y-4">
-          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
-            <TabsTrigger value="overview" className="text-xs xs:text-sm py-2 xs:py-2.5">Overview</TabsTrigger>
-            <TabsTrigger value="places" className="text-xs xs:text-sm py-2 xs:py-2.5">Places</TabsTrigger>
-            <TabsTrigger value="safety" className="text-xs xs:text-sm py-2 xs:py-2.5">Safety</TabsTrigger>
-            <TabsTrigger value="emergency" className="text-xs xs:text-sm py-2 xs:py-2.5">Emergency</TabsTrigger>
-            <TabsTrigger value="profile" className="text-xs xs:text-sm py-2 xs:py-2.5">Profile</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 sm:space-y-4">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto p-1 gap-1">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Home</span>
+            </TabsTrigger>
+            <TabsTrigger value="places" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Places</span>
+              <span className="sm:hidden">Map</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
+            </TabsTrigger>
+            <TabsTrigger value="safety" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Safety</span>
+              <span className="sm:hidden">Safe</span>
+            </TabsTrigger>
+            <TabsTrigger value="emergency" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Emergency</span>
+              <span className="sm:hidden">SOS</span>
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">Profile</span>
+              <span className="sm:hidden">Me</span>
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-3 xs:space-y-4">
+          <TabsContent value="overview" className="space-y-3 sm:space-y-4">
             {/* Weather Widget */}
             {weatherData && (
               <Card className="mb-4">
@@ -1030,6 +1001,100 @@ export default function TouristDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Visit Trends */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <BarChart3 className="w-5 h-5" />
+                    <span>Daily Visit Activity</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {visitTrendsLoading ? (
+                    <div className="flex items-center justify-center h-[300px]">
+                      <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : visitTrendsError ? (
+                    <div className="flex items-center justify-center h-[300px] text-red-500">
+                      <AlertCircle className="w-6 h-6 mr-2" />
+                      <span>Error loading visit trends</span>
+                    </div>
+                  ) : (
+                    <BarChartComponent 
+                      data={visitTrendData || []} 
+                      height={300}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Safety Score Trends */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <TrendingUp className="w-5 h-5" />
+                    <span>Safety Score Progress</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {safetyTrendsLoading ? (
+                    <div className="flex items-center justify-center h-[300px]">
+                      <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : safetyTrendsError ? (
+                    <div className="flex items-center justify-center h-[300px] text-red-500">
+                      <AlertCircle className="w-6 h-6 mr-2" />
+                      <span>Error loading safety trends</span>
+                    </div>
+                  ) : (
+                    <LineChartComponent 
+                      data={safetyScoreData || []}
+                      dataKey="value"
+                      strokeColor="#10B981"
+                      height={300}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Place Types */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Places Visited by Type</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {placeTypesLoading ? (
+                    <div className="flex items-center justify-center h-[300px]">
+                      <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : placeTypesError ? (
+                    <div className="flex items-center justify-center h-[300px] text-red-500">
+                      <AlertCircle className="w-6 h-6 mr-2" />
+                      <span>Error loading place types</span>
+                    </div>
+                  ) : (
+                    <BarChartComponent 
+                      data={placeTypeData || []}
+                      height={300}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Area Safety Map */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Regional Safety Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <IndiaMapComponent />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="places" className="space-y-3 xs:space-y-4">

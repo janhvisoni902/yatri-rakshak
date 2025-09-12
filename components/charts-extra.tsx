@@ -40,8 +40,8 @@ export function CustomTooltipContent({
     : payload;
 
   return (
-    <div className="bg-popover text-popover-foreground grid min-w-32 items-start gap-1.5 rounded-lg border px-3 py-1.5 text-xs">
-      <div className="font-medium">{label}</div>
+    <div className="bg-black/70 backdrop-blur-sm border border-gray-600/50 rounded-lg px-3 py-2 shadow-xl">
+      <div className="text-xs font-medium text-gray-300 mb-1">{label}</div>
       <div className="grid gap-1.5">
         {orderedPayload.map((entry:any, index:any) => {
           // Skip undefined entries
@@ -54,21 +54,30 @@ export function CustomTooltipContent({
           const color = colorMap[name] || "var(--chart-1)";
           const displayLabel = labelMap[name] || name;
 
+          // Add descriptive text based on data type
+          const getDescription = (key: string, val: number) => {
+            if (key === 'actual') return `Current period performance: ${valueFormatter(val)}`;
+            if (key === 'projected') return `Forecasted target: ${valueFormatter(val)}`;
+            if (key === 'revenues') return `Revenue generated: ${valueFormatter(val)}`;
+            if (key === 'churn') return `Customer churn: ${valueFormatter(val)}`;
+            if (key === 'value') return `Total value: ${valueFormatter(val)}`;
+            return `${displayLabel}: ${valueFormatter(val)}`;
+          };
+
           return (
-            <div
-              key={`item-${index}`}
-              className="flex items-center justify-between gap-3"
-            >
+            <div key={`item-${index}`} className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <div
-                  className="size-2 rounded-xs"
+                  className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: color }}
                 />
-                <span className="text-muted-foreground">{displayLabel}</span>
+                <span className="text-sm font-semibold text-white">
+                  {displayLabel}
+                </span>
               </div>
-              <span className="text-foreground font-mono font-medium tabular-nums">
-                {valueFormatter(value)}
-              </span>
+              <div className="text-xs text-gray-300 ml-4">
+                {getDescription(name, value)}
+              </div>
             </div>
           );
         })}
