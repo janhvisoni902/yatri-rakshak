@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Users, MapPin, AlertTriangle, Phone, Star, Search, Lock, ArrowRight, Play, Zap, Database, Sparkles } from 'lucide-react';
@@ -21,17 +21,128 @@ export default function Home() {
     }
   }, []);
 
+  // Siren playback using Web Audio API (no external asset needed)
+  const playSiren = useCallback(async () => {
+    try {
+      const AudioCtx = (typeof window !== 'undefined' && (window.AudioContext || (window as any).webkitAudioContext));
+      if (!AudioCtx) return null;
+      const audioContext = new AudioCtx();
+      // Ensure maximum volume within app context
+      const masterGain = audioContext.createGain();
+      masterGain.gain.value = 1.0;
+      masterGain.connect(audioContext.destination);
+
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.connect(masterGain);
+      oscillator.start();
+
+      let isActive = true;
+      const sweep = async () => {
+        while (isActive) {
+          // Sweep between 600Hz and 1200Hz to mimic a siren
+          oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+          oscillator.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.5);
+          oscillator.frequency.linearRampToValueAtTime(600, audioContext.currentTime + 1.0);
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      };
+      sweep();
+
+      const stop = () => {
+        try {
+          isActive = false;
+          oscillator.stop();
+          oscillator.disconnect();
+          masterGain.disconnect();
+          audioContext.close();
+        } catch {}
+      };
+      return stop;
+    } catch (err) {
+      console.error('Failed to play siren', err);
+      return null;
+    }
+  }, []);
+
+  const holdTimerRef = useRef<number | null>(null);
+  const holdStartRef = useRef<number | null>(null);
+  const sirenStopRef = useRef<(() => void) | null>(null);
+  const [isHolding, setIsHolding] = useState(false);
+  const [isSirenActive, setIsSirenActive] = useState(false);
+
   const triggerPanic = useCallback(async () => {
     try {
       const res = await fetch('/api/emergency', { method: 'POST' });
       if (!res.ok) {
         console.error('Panic API failed');
       }
-      router.push('/dashboard');
+      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+        try { navigator.vibrate([100, 50, 200]); } catch {}
+      }
+      // Intentionally do not navigate away so the siren can continue playing
     } catch (e) {
       console.error('Panic error', e);
     }
-  }, [router]);
+  }, []);
+
+  const cancelHold = useCallback(() => {
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    setIsHolding(false);
+    holdStartRef.current = null;
+  }, []);
+
+  const handlePanicPointerDown = useCallback(() => {
+    setIsHolding(true);
+    holdStartRef.current = Date.now();
+    holdTimerRef.current = window.setTimeout(async () => {
+      // 3 seconds hold completed
+      try {
+        await triggerPanic();
+        if (!sirenStopRef.current) {
+          const stop = await playSiren();
+          if (stop) {
+            sirenStopRef.current = stop;
+            setIsSirenActive(true);
+          }
+        } else {
+          setIsSirenActive(true);
+        }
+      } finally {
+        setIsHolding(false);
+        holdTimerRef.current = null;
+      }
+    }, 3000);
+  }, [playSiren, triggerPanic]);
+
+  const handlePanicPointerUpOrCancel = useCallback(() => {
+    // If user releases before 3s, cancel
+    cancelHold();
+  }, [cancelHold]);
+
+  // Optional: stop siren when leaving page
+  useEffect(() => {
+    return () => {
+      if (sirenStopRef.current) {
+        sirenStopRef.current();
+        sirenStopRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleStopSiren = useCallback(() => {
+    try {
+      if (sirenStopRef.current) {
+        sirenStopRef.current();
+        sirenStopRef.current = null;
+      }
+    } finally {
+      setIsSirenActive(false);
+    }
+  }, []);
 
   if (status === 'loading') {
     return (
@@ -210,7 +321,34 @@ export default function Home() {
                 <CardDescription className="text-foreground/70">Instant help request</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={triggerPanic} className="defi-button w-full py-6 text-lg">Send Panic Alert</Button>
+                <div className="w-full flex items-center justify-center gap-6 flex-wrap">
+                  <Button
+                    className="relative select-none bg-red-600 hover:bg-red-700 text-white rounded-full w-40 h-40 sm:w-48 sm:h-48 active:scale-95 transition-transform shadow-lg shadow-red-600/40 focus:ring-4 focus:ring-red-500/40"
+                    onPointerDown={handlePanicPointerDown}
+                    onPointerUp={handlePanicPointerUpOrCancel}
+                    onPointerCancel={handlePanicPointerUpOrCancel}
+                    onPointerLeave={handlePanicPointerUpOrCancel}
+                    aria-label="Press and hold for 3 seconds to send SOS"
+                  >
+                    <span className="absolute inset-0 rounded-full ring-2 ring-red-400 animate-pulse" aria-hidden="true"></span>
+                    <span className="relative z-10 text-xl font-bold">
+                      {isHolding ? 'HOLD…' : 'PANIC'}
+                    </span>
+                  </Button>
+                  {isSirenActive && (
+                    <Button
+                      className="relative select-none bg-white hover:bg-gray-100 text-red-600 rounded-full w-40 h-40 sm:w-48 sm:h-48 active:scale-95 transition-transform shadow-lg shadow-gray-400/40 border border-gray-200 focus:ring-4 focus:ring-red-500/30"
+                      onClick={handleStopSiren}
+                      aria-label="Stop siren"
+                    >
+                      <span className="absolute inset-0 rounded-full ring-2 ring-gray-300" aria-hidden="true"></span>
+                      <span className="relative z-10 text-xl font-bold">STOP</span>
+                    </Button>
+                  )}
+                </div>
+                <p className="mt-3 text-xs text-foreground/70 text-center">
+                  Press and hold for 3 seconds to trigger SOS with siren
+                </p>
               </CardContent>
             </Card>
 
