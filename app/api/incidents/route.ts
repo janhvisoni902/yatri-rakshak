@@ -75,26 +75,37 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const location = searchParams.get('location');
     const userId = searchParams.get('userId');
+    const status = searchParams.get('status');
+    const priority = searchParams.get('priority');
+    const assignedTo = searchParams.get('assignedTo');
 
     let query: any = {};
     
     if (userId === session.user.id) {
       // Get user's own incidents
       query['reportedBy.userId'] = userId;
-    } else if (location && ['police', 'higher_authority', 'admin'].includes(session.user.role)) {
-      // Get incidents by location for authorities
-      query.location = { $regex: location, $options: 'i' };
     } else if (['police', 'higher_authority', 'admin'].includes(session.user.role)) {
-      // Get all incidents for authorities
-      // No additional query restrictions
+      // Authorities can see all incidents with optional filtering
+      if (location) {
+        query.location = { $regex: location, $options: 'i' };
+      }
+      if (status) {
+        query.status = status;
+      }
+      if (priority) {
+        query.priority = priority;
+      }
+      if (assignedTo) {
+        query.assignedTo = assignedTo;
+      }
     } else {
       // Regular users can only see their own incidents
       query['reportedBy.userId'] = session.user.id;
     }
 
     const incidents = await Incident.find(query)
-      .sort({ timestamp: -1 })
-      .limit(50)
+      .sort({ createdAt: -1 })
+      .limit(100)
       .lean();
 
     return NextResponse.json({ incidents }, { status: 200 });
@@ -103,6 +114,71 @@ export async function GET(req: NextRequest) {
     console.error('Get incidents error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch incidents' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Only police and higher authorities can update incidents
+    if (!['police', 'higher_authority', 'admin'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
+    await connectDB();
+
+    const body = await req.json();
+    const { id, status, assignedTo, notes, priority } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Incident ID is required' }, { status: 400 });
+    }
+
+    const updateData: any = {
+      updatedAt: new Date()
+    };
+
+    if (status) updateData.status = status;
+    if (assignedTo) updateData.assignedTo = assignedTo;
+    if (priority) updateData.priority = priority;
+
+    // Add update to history
+    const updateMessage = `Status updated to ${status || 'current status'}${assignedTo ? ` and assigned to ${assignedTo}` : ''} by ${session.user.name}`;
+    
+    const incident = await Incident.findByIdAndUpdate(
+      id,
+      {
+        ...updateData,
+        $push: {
+          updates: {
+            message: notes || updateMessage,
+            updatedBy: session.user.id,
+            timestamp: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+
+    if (!incident) {
+      return NextResponse.json({ error: 'Incident not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      incident
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error('Update incident error:', error);
+    return NextResponse.json(
+      { error: 'Failed to update incident' },
       { status: 500 }
     );
   }
