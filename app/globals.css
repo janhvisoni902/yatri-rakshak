@@ -53,40 +53,84 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --card: oklch(0.08 0.01 285);
-  --card-foreground: oklch(0.95 0.01 285);
-  --popover: oklch(0.08 0.01 285);
-  --popover-foreground: oklch(0.95 0.01 285);
-  --primary: oklch(0.7 0.2 250);
-  --primary-foreground: oklch(0.95 0.01 285);
-  --secondary: oklch(0.12 0.01 285);
-  --secondary-foreground: oklch(0.9 0.01 285);
-  --muted: oklch(0.12 0.01 285);
-  --muted-foreground: oklch(0.6 0.01 285);
-  --accent: oklch(0.15 0.01 285);
-  --accent-foreground: oklch(0.9 0.01 285);
-  --destructive: oklch(0.637 0.237 25.331);
-  --border: oklch(0.15 0.01 285);
-  --input: oklch(0.12 0.01 285);
-  --ring: oklch(0.7 0.2 250);
-  --chart-1: oklch(0.7 0.2 250);
-  --chart-2: oklch(0.6 0.25 280);
-  --chart-3: oklch(0.5 0.2 200);
-  --chart-4: oklch(0.645 0.246 16.439);
-  --chart-5: oklch(0.586 0.253 17.585);
-  --sidebar: oklch(0.05 0.01 285);
-  --sidebar-foreground: oklch(0.8 0.01 285);
-  --sidebar-primary: oklch(0.7 0.2 250);
-  --sidebar-primary-foreground: oklch(0.95 0.01 285);
-  --sidebar-accent: oklch(0.12 0.01 285);
-  --sidebar-accent-foreground: oklch(0.8 0.01 285);
-  --sidebar-border: oklch(0.15 0.01 285);
-  --sidebar-ring: oklch(0.7 0.2 250);
+  --radius: 0.75rem;
+  
+  /* Enhanced color palette with better contrast and modern tones */
+  --card: oklch(0.06 0.015 285);
+  --card-foreground: oklch(0.98 0.005 285);
+  --popover: oklch(0.07 0.015 285);
+  --popover-foreground: oklch(0.98 0.005 285);
+  --primary: oklch(0.65 0.22 240);
+  --primary-foreground: oklch(0.98 0.005 285);
+  --secondary: oklch(0.14 0.015 285);
+  --secondary-foreground: oklch(0.92 0.01 285);
+  --muted: oklch(0.11 0.015 285);
+  --muted-foreground: oklch(0.65 0.01 285);
+  --accent: oklch(0.16 0.02 285);
+  --accent-foreground: oklch(0.95 0.01 285);
+  --destructive: oklch(0.65 0.25 25);
+  --destructive-foreground: oklch(0.98 0.005 285);
+  --warning: oklch(0.7 0.2 65);
+  --warning-foreground: oklch(0.1 0.02 285);
+  --success: oklch(0.6 0.18 145);
+  --success-foreground: oklch(0.98 0.005 285);
+  --info: oklch(0.6 0.2 220);
+  --info-foreground: oklch(0.98 0.005 285);
+  
+  --border: oklch(0.18 0.02 285);
+  --border-hover: oklch(0.25 0.02 285);
+  --input: oklch(0.12 0.015 285);
+  --ring: oklch(0.65 0.22 240);
+  
+  /* Enhanced chart colors with better accessibility */
+  --chart-1: oklch(0.65 0.22 240);
+  --chart-2: oklch(0.62 0.26 280);
+  --chart-3: oklch(0.58 0.22 200);
+  --chart-4: oklch(0.66 0.25 16);
+  --chart-5: oklch(0.6 0.26 17);
+  --chart-6: oklch(0.7 0.18 162);
+  --chart-7: oklch(0.68 0.24 340);
+  --chart-8: oklch(0.64 0.2 85);
+  
+  --sidebar: oklch(0.04 0.015 285);
+  --sidebar-foreground: oklch(0.85 0.01 285);
+  --sidebar-primary: oklch(0.65 0.22 240);
+  --sidebar-primary-foreground: oklch(0.98 0.005 285);
+  --sidebar-accent: oklch(0.12 0.015 285);
+  --sidebar-accent-foreground: oklch(0.85 0.01 285);
+  --sidebar-border: oklch(0.16 0.02 285);
+  --sidebar-ring: oklch(0.65 0.22 240);
+  
   --background: oklch(0.02 0.01 285);
-  --foreground: oklch(0.95 0.01 285);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --chart-6: oklch(0.696 0.17 162.48);
+  --background-alt: oklch(0.04 0.015 285);
+  --foreground: oklch(0.98 0.005 285);
+  
+  /* Enhanced shadow variables */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+  
+  /* Glow effects */
+  --glow-primary: 0 0 20px oklch(0.65 0.22 240 / 0.3);
+  --glow-success: 0 0 20px oklch(0.6 0.18 145 / 0.3);
+  --glow-warning: 0 0 20px oklch(0.7 0.2 65 / 0.3);
+  --glow-danger: 0 0 20px oklch(0.65 0.25 25 / 0.3);
+  
+  /* Animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+  
+  /* Animation easings */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .dark {

@@ -202,7 +202,7 @@ function AnalyticsSection() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -628,7 +628,7 @@ function ReportsSection() {
                 { action: 'Incident #INC-2025-001 resolved', user: 'Officer Singh', time: '2 min ago', type: 'success' },
                 { action: 'New user verification approved', user: 'Admin', time: '5 min ago', type: 'info' },
                 { action: 'Tourist alert in Red Fort area', user: 'System', time: '8 min ago', type: 'warning' },
-                { action: 'Performance report generated', user: session?.user?.name || 'You', time: '15 min ago', type: 'info' },
+                { action: 'Performance report generated', user: 'Admin', time: '15 min ago', type: 'info' },
                 { action: 'Database backup completed', user: 'System', time: '1 hour ago', type: 'success' }
               ].map((activity, index) => (
                 <div key={index} className="flex items-center space-x-3 text-sm">
@@ -1210,7 +1210,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleTouristAlertUpdate = async (alertId: string, status: string, response?: string) => {
+  const handleTouristAlertUpdate = async (alertId: string, status: 'new' | 'investigating' | 'resolved', response?: string) => {
     try {
       const apiResponse = await fetch('/api/tourist-alerts', {
         method: 'PUT',

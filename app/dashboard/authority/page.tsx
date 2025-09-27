@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/input';
 import { Badge } from '@/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/tabs';
-import { 
-  Eye, 
-  AlertTriangle, 
-  Users, 
+import {
+  Eye,
+  AlertTriangle,
+  Users,
   Shield,
   ShieldCheck,
   TrendingUp,
@@ -395,9 +395,9 @@ export default function AuthorityDashboard() {
   };
 
   const handleKYCApproval = (applicationId: string, approved: boolean) => {
-    setKYCApplications(prev => 
-      prev.map(app => 
-        app.id === applicationId 
+    setKYCApplications(prev =>
+      prev.map(app =>
+        app.id === applicationId
           ? { ...app, status: approved ? 'approved' : 'rejected' }
           : app
       )
@@ -405,23 +405,23 @@ export default function AuthorityDashboard() {
   };
 
   const handleIncidentAction = (incidentId: string, action: string) => {
-    setIncidents(prev => 
-      prev.map(incident => 
-        incident.id === incidentId 
-          ? { 
-              ...incident, 
-              status: action as any,
-              updatedAt: new Date().toISOString()
-            }
+    setIncidents(prev =>
+      prev.map(incident =>
+        incident.id === incidentId
+          ? {
+            ...incident,
+            status: action as any,
+            updatedAt: new Date().toISOString()
+          }
           : incident
       )
     );
   };
 
   const resolveSystemAlert = (alertId: string) => {
-    setSystemAlerts(prev => 
-      prev.map(alert => 
-        alert.id === alertId 
+    setSystemAlerts(prev =>
+      prev.map(alert =>
+        alert.id === alertId
           ? { ...alert, resolved: true }
           : alert
       )
@@ -589,8 +589,10 @@ export default function AuthorityDashboard() {
               <span className="hidden sm:inline">KYC Management</span>
               <span className="sm:hidden">KYC</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
+            <TabsTrigger value="system" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-3">
+              <span className="hidden sm:inline">System</span>
+              <span className="sm:hidden">System</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 sm:space-y-6">
@@ -622,8 +624,8 @@ export default function AuthorityDashboard() {
                             {new Date(alert.timestamp).toLocaleString()}
                           </p>
                         </div>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => resolveSystemAlert(alert.id)}
                         >
@@ -757,9 +759,9 @@ export default function AuthorityDashboard() {
                             </Badge>
                           </div>
                         </div>
-                        
+
                         <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-3 line-clamp-2">{incident.description}</p>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <div className="flex items-center space-x-1">
                             <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -845,12 +847,12 @@ export default function AuthorityDashboard() {
                           <Badge className="bg-blue-100 text-blue-800">
                             {application.role.toUpperCase()}
                           </Badge>
-                          <Badge className={application.status === 'pending' ? 'bg-yellow-500' : 
-                                           application.status === 'approved' ? 'bg-green-500' : 'bg-red-500'}>
+                          <Badge className={application.status === 'pending' ? 'bg-yellow-500' :
+                            application.status === 'approved' ? 'bg-green-500' : 'bg-red-500'}>
                             {application.status.toUpperCase()}
                           </Badge>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground mb-3">
                           <div>
                             <p className="font-medium">Email:</p>
@@ -873,7 +875,7 @@ export default function AuthorityDashboard() {
                         {application.badgeNumber && (
                           <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded mb-3">
                             <p className="text-sm">
-                              <strong>Badge Number:</strong> {application.badgeNumber} | 
+                              <strong>Badge Number:</strong> {application.badgeNumber} |
                               <strong> Department:</strong> {application.department}
                             </p>
                           </div>
@@ -882,7 +884,7 @@ export default function AuthorityDashboard() {
                         {application.visitPurpose && (
                           <div className="p-2 bg-green-50 dark:bg-green-900/30 rounded">
                             <p className="text-sm">
-                              <strong>Visit Purpose:</strong> {application.visitPurpose} | 
+                              <strong>Visit Purpose:</strong> {application.visitPurpose} |
                               <strong> Duration:</strong> {application.visitDuration}
                             </p>
                           </div>
@@ -947,9 +949,9 @@ export default function AuthorityDashboard() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="font-semibold text-lg">{unit.callSign}</h3>
-                        <Badge className={unit.status === 'available' ? 'bg-green-500' : 
-                                         unit.status === 'busy' ? 'bg-orange-500' : 
-                                         unit.status === 'responding' ? 'bg-blue-500' : 'bg-gray-500'}>
+                        <Badge className={unit.status === 'available' ? 'bg-green-500' :
+                          unit.status === 'busy' ? 'bg-orange-500' :
+                            unit.status === 'responding' ? 'bg-blue-500' : 'bg-gray-500'}>
                           {unit.status.toUpperCase()}
                         </Badge>
                       </div>
@@ -958,7 +960,7 @@ export default function AuthorityDashboard() {
                         <p className="text-lg font-bold text-green-600">{unit.efficiency}%</p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div>
                         <p className="font-medium">Officers:</p>
@@ -1007,7 +1009,7 @@ export default function AuthorityDashboard() {
                       Failed to load data
                     </div>
                   ) : (
-                    <BarChartComponent 
+                    <BarChartComponent
                       data={incidentTrendData}
                       height={250}
                     />
@@ -1030,7 +1032,7 @@ export default function AuthorityDashboard() {
                       Failed to load data
                     </div>
                   ) : (
-                    <LineChartComponent 
+                    <LineChartComponent
                       data={responseTimeData}
                       dataKey="time"
                       height={250}
@@ -1055,7 +1057,7 @@ export default function AuthorityDashboard() {
                       Failed to load data
                     </div>
                   ) : (
-                    <BarChartComponent 
+                    <BarChartComponent
                       data={incidentTypeData}
                       height={250}
                     />
@@ -1071,10 +1073,10 @@ export default function AuthorityDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <LineChartComponent 
-                    data={incidentTrendData.map(item => ({ 
-                      name: item.name, 
-                      value: Math.round((item.resolved / item.incidents) * 100) 
+                  <LineChartComponent
+                    data={incidentTrendData.map(item => ({
+                      name: item.name,
+                      value: Math.round((item.resolved / item.incidents) * 100)
                     }))}
                     dataKey="value"
                     height={250}
@@ -1096,7 +1098,7 @@ export default function AuthorityDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <IndiaMapComponent 
+                <IndiaMapComponent
                   onStateClick={(state) => {
                     console.log('Clicked state:', state);
                     // Handle state click - could show detailed stats or navigate to state-specific view
