@@ -57,10 +57,15 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
+      // Handle sign out redirect
+      if (url === `${baseUrl}/api/auth/signout`) {
+        return baseUrl;
+      }
+      
       // Redirect to home after login; client can navigate to dashboard
-      if (url.startsWith('/')) return `${baseUrl}/`;
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
       else if (new URL(url).origin === baseUrl) return url;
-      return `${baseUrl}/`;
+      return baseUrl;
     },
     async jwt({ token, user }) {
       if (user) {
@@ -84,6 +89,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
+    signOut: '/auth/signout', // Use custom sign out page
     error: '/auth/error',
   },
   session: {

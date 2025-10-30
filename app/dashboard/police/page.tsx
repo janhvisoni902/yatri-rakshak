@@ -41,6 +41,7 @@ import BarChartComponent from '@/components/charts/BarChart';
 import LineChartComponent from '@/components/charts/LineChart';
 import IndiaMapComponent from '@/components/charts/IndiaMap';
 import UserDropdown from '@/components/UserDropdown';
+import UniversalMap from '@/components/maps/UniversalMap';
 
 interface PoliceStats {
   activePatrols: number;
@@ -262,7 +263,7 @@ export default function PoliceDashboard() {
                 variant="outline" 
                 size="sm"
                 className="text-xs xs:text-sm px-2 xs:px-3"
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={() => import('@/lib/auth-utils').then(({ performSignOut }) => performSignOut())}
               >
                 <span className="hidden xs:inline">Sign Out</span>
                 <span className="xs:hidden">Exit</span>
@@ -374,9 +375,10 @@ export default function PoliceDashboard() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2 xs:space-y-4">
-          <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-6 h-auto p-1">
             <TabsTrigger value="incidents" className="text-xs xs:text-sm py-2 xs:py-2.5">Incidents</TabsTrigger>
             <TabsTrigger value="patrols" className="text-xs xs:text-sm py-2 xs:py-2.5">Patrols</TabsTrigger>
+            <TabsTrigger value="tracking" className="text-xs xs:text-sm py-2 xs:py-2.5">Tracking</TabsTrigger>
             <TabsTrigger value="analytics" className="text-xs xs:text-sm py-2 xs:py-2.5">Analytics</TabsTrigger>
             <TabsTrigger value="reports" className="text-xs xs:text-sm py-2 xs:py-2.5">Reports</TabsTrigger>
             <TabsTrigger value="tools" className="text-xs xs:text-sm py-2 xs:py-2.5">Tools</TabsTrigger>
@@ -573,6 +575,100 @@ export default function PoliceDashboard() {
                       <UserCheck className="w-8 h-8" />
                       <span>Missing Person</span>
                     </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="tracking" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold">Location Tracking & Monitoring</h2>
+                <p className="text-sm text-muted-foreground">
+                  Real-time location tracking of tourists and citizens for safety
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                  Live Tracking Active
+                </Badge>
+                <Button variant="outline" size="sm">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+            </div>
+
+            {/* Universal Map with User Tracking */}
+            <UniversalMap 
+              showUserTracking={true}
+              allowLocationSharing={true}
+              className="mb-6"
+            />
+
+            {/* Tracking Statistics */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Active Trackers</p>
+                      <p className="text-2xl font-bold text-green-600">24</p>
+                    </div>
+                    <Eye className="w-6 h-6 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Emergency Alerts</p>
+                      <p className="text-2xl font-bold text-red-600">2</p>
+                    </div>
+                    <AlertTriangle className="w-6 h-6 text-red-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Safe Zones</p>
+                      <p className="text-2xl font-bold text-blue-600">15</p>
+                    </div>
+                    <Shield className="w-6 h-6 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Response Time</p>
+                      <p className="text-2xl font-bold text-purple-600">4.2m</p>
+                    </div>
+                    <Clock className="w-6 h-6 text-purple-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Privacy & Security Notice */}
+            <Card className="border-blue-200 bg-blue-50/50">
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-3">
+                  <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-blue-900">Privacy & Security</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Location tracking is only available for users who have opted in and granted appropriate permissions. 
+                      All location data is encrypted and access is logged for audit purposes. Emergency situations may override privacy settings for safety.
+                    </p>
                   </div>
                 </div>
               </CardContent>

@@ -64,6 +64,7 @@ import BarChartComponent from '@/components/charts/BarChart';
 import LineChartComponent from '@/components/charts/LineChart';
 import IndiaMapComponent from '@/components/charts/IndiaMap';
 import ProfileEditModal from '@/components/profile-edit-modal';
+import UniversalMap from '@/components/maps/UniversalMap';
 
 interface TouristStats {
   safetyScore: number;
@@ -777,7 +778,7 @@ export default function TouristDashboard() {
                 variant="outline" 
                 size="sm"
                 className="border-border/50 bg-background/50 text-foreground hover:bg-background/80 text-xs xs:text-sm px-2 xs:px-3"
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={() => import('@/lib/auth-utils').then(({ performSignOut }) => performSignOut())}
               >
                 <span className="hidden xs:inline">Sign Out</span>
                 <span className="xs:hidden">Exit</span>
@@ -1098,6 +1099,13 @@ export default function TouristDashboard() {
           </TabsContent>
 
           <TabsContent value="places" className="space-y-3 xs:space-y-4">
+            {/* Interactive Map */}
+            <UniversalMap 
+              allowLocationSharing={true}
+              showUserTracking={false}
+              className="mb-6"
+            />
+            
             <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-3 xs:space-y-0">
               <div className="w-full xs:w-auto">
                 <h2 className="text-lg xs:text-xl font-semibold">Places & Attractions</h2>

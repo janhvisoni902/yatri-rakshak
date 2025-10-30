@@ -106,6 +106,7 @@ import BarChartComponent from '@/components/charts/BarChart';
 import LineChartComponent from '@/components/charts/LineChart';
 import IndiaMapComponent from '@/components/charts/IndiaMap';
 import UserDropdown from '@/components/UserDropdown';
+import UniversalMap from '@/components/maps/UniversalMap';
 
 interface AuthorityStats {
   totalIncidents: number;
@@ -596,6 +597,26 @@ export default function AuthorityDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+            {/* Real-time Location Monitoring */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MapPin className="w-5 h-5" />
+                  <span>Real-time Location Monitoring</span>
+                </CardTitle>
+                <CardDescription>
+                  Monitor tourist and citizen locations for enhanced safety and emergency response
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <UniversalMap 
+                  showUserTracking={true}
+                  allowLocationSharing={true}
+                  className="mb-4"
+                />
+              </CardContent>
+            </Card>
+
             <div className="grid gap-6 md:grid-cols-2">
               {/* System Alerts */}
               <Card>

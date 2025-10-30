@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { User, ChevronDown, Settings, Shield, LogOut, FileText } from 'lucide-react';
+import { performSignOut } from '@/lib/auth-utils';
 
 export default function UserDropdown() {
   const { data: session } = useSession();
@@ -25,7 +26,17 @@ export default function UserDropdown() {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' });
+    setIsOpen(false); // Close dropdown immediately
+    
+    // Show loading state
+    const signOutButton = document.querySelector('[data-signout-btn]') as HTMLButtonElement;
+    if (signOutButton) {
+      signOutButton.textContent = 'Signing out...';
+      signOutButton.disabled = true;
+    }
+    
+    // Use the utility function for clean sign out
+    await performSignOut();
   };
 
   const handleNavigation = (path: string) => {
@@ -84,7 +95,8 @@ export default function UserDropdown() {
             
             <button
               onClick={handleSignOut}
-              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-all duration-200 hover:translate-x-1 flex items-center space-x-2 group"
+              data-signout-btn
+              className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-900/20 hover:text-red-300 transition-all duration-200 hover:translate-x-1 flex items-center space-x-2 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <LogOut className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
               <span>Sign Out</span>

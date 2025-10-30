@@ -73,12 +73,50 @@ export default function Home() {
 
   const triggerPanic = useCallback(async () => {
     try {
-      const res = await fetch('/api/emergency', { method: 'POST' });
-      if (!res.ok) {
-        console.error('Panic API failed');
+      // Get current location for emergency
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          // Send enhanced emergency request
+          const res = await fetch('/api/emergency', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'panic_button',
+              location,
+              timestamp: new Date().toISOString(),
+              additionalInfo: {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform
+              }
+            })
+          });
+          
+          if (!res.ok) {
+            console.error('Panic API failed');
+          } else {
+            // Show success message
+            alert('Emergency alert sent! Authorities have been notified.');
+          }
+        }, (error) => {
+          // Fallback without location
+          fetch('/api/emergency', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'panic_button',
+              timestamp: new Date().toISOString()
+            })
+          });
+        });
       }
+      
       if (typeof window !== 'undefined' && 'vibrate' in navigator) {
-        try { navigator.vibrate([100, 50, 200]); } catch {}
+        try { navigator.vibrate([200, 100, 200, 100, 200]); } catch {}
       }
       // Intentionally do not navigate away so the siren can continue playing
     } catch (e) {
@@ -169,6 +207,10 @@ export default function Home() {
               </Link>
               <Link href="/dashboard" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
                 Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link href="/dashboard/women-safety" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
+                Women Safety
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link href="/kyc" className="text-foreground/80 hover:text-foreground transition-all duration-300 hover:scale-105 relative group">
@@ -355,12 +397,35 @@ export default function Home() {
             <Card className="defi-card">
               <CardHeader>
                 <CardTitle className="text-foreground">Emergency Numbers</CardTitle>
-                <CardDescription className="text-foreground/70">Tap to call</CardDescription>
+                <CardDescription className="text-foreground/70">Tap to call - Available 24/7</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <Button variant="outline" onClick={() => callNumber('100')}><Phone className="w-4 h-4 mr-2" />Police 100</Button>
-                <Button variant="outline" onClick={() => callNumber('108')}><Phone className="w-4 h-4 mr-2" />Medical 108</Button>
-                <Button variant="outline" onClick={() => callNumber('1363')}><Phone className="w-4 h-4 mr-2" />Tourist 1363</Button>
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <Button variant="outline" onClick={() => callNumber('100')} className="h-16 flex-col space-y-1">
+                  <Phone className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Police 100</span>
+                </Button>
+                <Button variant="outline" onClick={() => callNumber('108')} className="h-16 flex-col space-y-1">
+                  <Phone className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Medical 108</span>
+                </Button>
+                <Button variant="outline" onClick={() => callNumber('1091')} className="h-16 flex-col space-y-1 border-pink-300 text-pink-600 hover:bg-pink-50">
+                  <Phone className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Women 1091</span>
+                </Button>
+                <Button variant="outline" onClick={() => callNumber('1363')} className="h-16 flex-col space-y-1">
+                  <Phone className="w-5 h-5" />
+                  <span className="text-sm font-semibold">Tourist 1363</span>
+                </Button>
+              </CardContent>
+              <CardContent className="pt-2">
+                <div className="text-center">
+                  <Link href="/dashboard/women-safety">
+                    <Button className="bg-pink-600 hover:bg-pink-700 text-white">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Women Safety Center
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           </div>

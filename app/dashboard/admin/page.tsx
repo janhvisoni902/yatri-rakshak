@@ -1294,7 +1294,7 @@ export default function AdminDashboard() {
               </span>
               <Button 
                 variant="outline" 
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={() => import('@/lib/auth-utils').then(({ performSignOut }) => performSignOut())}
               >
                 Sign Out
               </Button>

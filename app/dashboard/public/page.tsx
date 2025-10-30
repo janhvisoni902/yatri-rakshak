@@ -209,7 +209,7 @@ export default function TouristDashboard() {
                 variant="outline" 
                 size="sm"
                 className="text-xs xs:text-sm px-2 xs:px-3"
-                onClick={() => router.push('/api/auth/signout')}
+                onClick={() => import('@/lib/auth-utils').then(({ performSignOut }) => performSignOut())}
               >
                 <span className="hidden xs:inline">Sign Out</span>
                 <span className="xs:hidden">Exit</span>
